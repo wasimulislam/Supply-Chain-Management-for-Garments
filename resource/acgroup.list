@@ -1,0 +1,16 @@
+     list acgroup
+        table acgroup
+        order xgroup
+        select "(xgroup like '%"+zvalue+"%' or xdesc like '%"+zvalue+"%')"
+        rows 20
+        objects xgroup attrib(link "abc" embed onclick="return updateParent(this:'')"), ~
+                xdesc,xacctype
+
+
+
+        //totals "","Totals","","","","",sum,sum
+
+        //headers none
+     end list
+
+

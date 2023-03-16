@@ -1,0 +1,18 @@
+product ZAB ERP
+
+table acbudget
+  caption "Budget"
+  columns  ztime,zutime,zauserid,zuuserid,zid,xyear,xper,xacc,xprime,~
+//
+xwh,xbudgetamt
+
+//item added to Rancon.table.column
+//xbudgetamt
+  primary key zid, xyear,xper,xwh,xacc
+
+  foreign key
+        zid references zbusiness.zid
+		//zid,xacc references acmst.zid,xacc
+  end foreign key
+  
+end table

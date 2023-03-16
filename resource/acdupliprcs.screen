@@ -1,0 +1,158 @@
+screen acdupliprcs
+
+     sidebar list one,list inv
+     sections form detail,jscript myscript
+
+
+     list one
+        caption "Account List For Delete"
+        table acduplicate
+        order xacc
+        //fixed xacc
+		//select "xacc='"+xacc+"'"
+		select "xstatus='Open' and zactive='1'"
+        rows 20
+        objects  xacc attrib(link "login?screen=acdupliprcs&command=Show&xacc=?"), ~
+				 xacctype,xacc1,xacc2,xacc3,xacc4,xacc5,xacc6,xacc7,xacc8,xacc9,xstatus,zactive
+     // headers "Branch","Quantity","Bonus Quantity","Effictive Date","Expiry Date","Ready for Delete"
+	 end list
+	 
+     list inv
+        caption "Deleted Account List"
+        table acduplicate
+        order xacc
+        //fixed xacc
+		//select "xacc='"+xacc+"'"
+		select "xstatus='Deleted'"
+        rows 20
+        objects  xacc attrib(link "login?screen=acdupliprcs&command=Show&xacc=?"), ~
+				 xacctype,xacc1,xacc2,xacc3,xacc4,xacc5,xacc6,xacc7,xacc8,xacc9,xstatus,zactive
+     // headers "Branch","Quantity","Bonus Quantity","Effictive Date","Expiry Date","Ready for Delete"
+	 end list
+
+     form detail
+        caption "Duplicate Accounts Remover"
+        table acduplicate
+        primarykey xacc
+        order xacc
+        //select "xacctype='Finished Goods'"
+        return "login"
+        layout 2
+        pstyle 3
+        objects Show,Clear,Top,Next,Previous,Bottom,Final Run,"<p>" ,~
+                xacc,xdesc display(const),xstatus display(hide)
+
+      field xacc
+		caption Active Account Code
+	  end fiield
+	  
+		field xdesc
+		  caption Account Description
+//        attrib local
+          display const
+          event after
+            set xdesc = acmst.xdesc("xacc = '"+xacc+"'")
+          end event
+        end field	  
+	  
+	
+	field xlong
+		column 2
+	end field
+
+	field zactive
+		caption Prepare for Checking
+		defail 1
+	end field
+
+	
+    field add
+			event before
+				set xacctype = acmst.xacctype("xacc = '"+xacc+"'")
+			end event
+				
+    end field
+
+
+	field Update
+		event before
+				set xacctype = acmst.xacctype("xacc = '"+xacc+"'")
+		end event
+		event after
+			//set xacctype = #sql("select xacctype from acmst where xacc='"+xacc+"'")
+			//print xacctype
+		end event
+	end field
+
+  
+field Final Run
+            event before
+								set acc=acmst.xacc("xacc='"+xacc+"'")
+                                if xacc .eq. ""
+                                        error "Please Choose Account Code First"
+                                else if xstatus .eq. "Deleted"
+                                        error "This Account Already Deleted"
+								else if xacc .ne. acc
+										error "Account Code doesn't Exist"
+                                end if
+            end event
+            event after
+                                
+                                        set temp = #spsql(zabsp_ALL_acc_Delete,#id,#user,xacc)
+                                        set record = acmst.xacc("xacc = '"+xacc1+"'")
+                                        if #result .eq. "false"
+                                        //print #result
+                                                print "<font color=red size=+2>Record deleted successfully</font>"
+                                        end if
+                    action show
+            end event
+          end field
+	
+        embed onsubmit="return submitit(this)"
+
+end form
+
+     jscript myscript
+
+        <script language="javascript" type="text/javascript">
+        var but
+        var result
+
+        function clicked(b){
+          but = b.value
+        }
+        function submitit(form){
+          result = true
+          if (but == "Complete"){
+            form.screen.value = "opdoheader"
+            form.searchbutton.value = "Find xdornum=?"
+          }
+          return result
+        }//this:xfabrictype#:xfabrictype#:xwidth#:xgsm#:xqtydel#:xorderrow#
+        function pickAcc(link,ftype,fcolor,width,gsm,prcs,qtydel,orderrow){
+          if (navigator.appName.indexOf("Netscape") >= 0){
+            document.one.xacc.value=link.text
+            document.one.xfabrictype.value=ftype.text
+            document.one.xfabriccolor.value=fcolor.text
+            document.one.xwidth.value=width.text
+            document.one.xgsm.value=gsm.text
+            document.one.xprcstype.value=prcs.text
+            document.one.xqtydel.value=qtydel.text
+            document.one.xdocrow.value=orderrow.text
+          }else{
+            document.one.xacc.value=link.innerText
+            document.one.xfabrictype.value=ftype.innerText
+            document.one.xfabriccolor.value=fcolor.innerText
+            document.one.xwidth.value=width.innerText
+            document.one.xgsm.value=gsm.innerText
+            document.one.xprcstype.value=prcs.innerText
+            document.one.xqtydel.value=qtydel.innerText
+            document.one.xdocrow.value=orderrow.innerText
+          }
+          return false
+        }
+
+        </script>
+     end jscript
+
+end screen

@@ -1,0 +1,123 @@
+screen acopenheader
+
+     caption "GL Voucher"
+     sidebar list header, text three
+     sections form one,  jscript myscript
+
+    list header
+        caption "<br><center><b>"Voucher List"</b>"
+        table acheader
+        order xvoucher
+        select "xper=0"
+        //fixed xsub
+        navigators alpha //group xsub "select xsub from acdetail where (xprime<xarap)"
+        rows 10
+        objects ~
+         xvoucher attrib(link "login?screen=acopenheader&command=Show&xvoucher=?"), ~
+         xref,xdate,xyear,xper,xstatusjv
+//         headers Invoice List
+     end list
+
+
+
+     form one
+        caption "Header"
+        table acheader
+        order xvoucher
+        select "xper=0"
+        return "login"
+        layout 2
+        pstyle 1
+        objects Details, Clear,Show,Add, Update, Delete,*next, Top, Previous, Next, Bottom,"<p>" ,~
+               xvoucher display(trn GL Voucher), xcur, xexch, xref, xdate, xyear, xper ,xstatusjv,xlong
+
+        field xdate
+          event before
+          end event
+        end field
+
+        field xper
+          display constant
+          default '0'
+        end field
+
+        field xlong
+          caption Header Description
+          width 50
+        end field
+
+
+        field xstatusjv
+           display constant
+        end field
+
+
+        field xvoucher
+         event after
+            set globals(xvoucher)=xvoucher
+            set globals(xexch)=xexch
+          end event
+        end field
+
+
+        field clear
+         event after
+            set #field(Details.display) = "hidden"
+            set #field(Delete.display) = "hidden"
+            set #field(Update.display) = "hidden"
+            set #field(Show.display) = "hidden"
+         end event
+        end field
+
+
+        field Add
+          event before
+            set xexch = #exch(xdate,xcur)
+            set xstatusjv="Balanced"
+          end event
+          event after
+            class gltrn(acValidateAfterHeader{xvoucher,xexch})
+          end event
+        end field
+
+        field Update
+          event after
+            class gltrn(acValidateAfterHeader{xvoucher,xexch})
+          end event
+        end field
+
+        field Delete
+          event after
+            class gltrn(acValidateAfterHeader{xvoucher,xexch})
+          end event
+        end field
+
+        //embed onsubmit="return submitit(this)"
+        embed onsubmit="submitit(this)"
+        field Details
+          embed onclick="clicked(this)"
+        end field
+     end form
+
+     jscript myscript
+
+        <script language="javascript" type="text/javascript">
+        var detail
+
+        function clicked(b){
+          detail="clicked"
+        }
+        function submitit(form){
+          if (detail=="clicked"){
+            form.screen.value = "acopendetail"
+            form.searchbutton.value = "Find xvoucher=?"
+            //return false
+          }
+        }
+
+        </script>
+     end jscript
+
+
+
+end screen

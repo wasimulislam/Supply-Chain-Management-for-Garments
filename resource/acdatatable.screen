@@ -1,0 +1,146 @@
+screen acdatatable
+    
+	 pstyle datatable
+     sections form one,list one,list two,list three, jscript myscript
+
+		list one
+		caption "Pending Cheque List for Reconcilize (Editable)"
+		//table acbal
+		table acbalbankview
+		primarykey xvoucher,xrow
+		order xvoucher 
+		//fixed xacc
+
+		select "xacc <> '' and xacc='"+xacc+"' and isnull(zactive,'0')='0' and left(xvoucher,4)<>'OB--' and cast(xdate as date) between '"+xfdate+"' and '"+xtdate+"'"
+		//select "xacc <> '' and xacc='"+xacc+"' and left(xvoucher,4)<>'OB--' and cast(xdate as date) between '"+xfdate+"' and '"+xtdate+"'"
+		//dtlengthmenu [25,50,100, -1], [25,50,100, "All"]
+		dtlengthmenu [100, -1], [100, "All"]
+		rows 100
+		objects  xvoucher display(const),xrow display(const),xlong display(const),xprime display(const),xdate display(const),xdatecom,zactive
+		
+		totals "Totals","","",sum
+		headers "Voucher","Row","Description","Amount","Voucher Date","Realised Date","Realised Yes/No?"
+		end list
+		
+		list two
+		caption "Pending Cheque List for Reconcilize (Non-Editable)"
+		//table acbal
+		table acbalbankview
+		primarykey xvoucher,xrow
+		order xvoucher 
+		//fixed xacc
+		select "xacc <> '' and xacc='"+xacc+"' and isnull(zactive,'0')='0' and left(xvoucher,4)<>'OB--' and xdate between '"+xfdate+"' and '"+xtdate+"'"
+		dtlengthmenu [25,50,100, -1], [25,50,100, "All"]
+		rows 50
+		objects  xvoucher display(const),xrow display(const),xlong display(const),xprime display(const),xdate display(const),xdatecom display(const),zactive display(const)
+		
+		totals "Totals","","",sum
+		headers "Voucher","Row","Description","Amount","Voucher Date","Realised Date","Realised Yes/No?"
+		end list
+		
+		list three
+		caption "Additional Cheque List for Reconcilize"
+		//table acbal
+		table acbalbankview
+		primarykey xvoucher,xrow
+		order xvoucher 
+		//fixed xacc
+
+		select "xacc <> '' and xacc='"+xacc+"' and isnull(zactive,'0')='0' and left(xvoucher,4)<>'OB--'"
+		dtlengthmenu [25,50,100, -1], [25,50,100, "All"]
+		rows 50
+		objects  xvoucher display(const),xrow display(const),xlong display(const),xprime display(const),xdate display(const),xdatecom,zactive
+		
+		totals "Totals","","",sum
+		headers "Voucher","Row","Description","Amount","Voucher Date","Realised Date","Realised Yes/No?"
+		end list
+		
+		
+		
+	
+			
+
+     form one
+        caption "Reconciliation Statement"
+        table acmst
+        primarykey xacc
+        order xacc
+        return "login"
+        layout 2
+        pstyle 3
+        objects Show,Clear,"<p>" ,~///Add,Delete,Top,Previous,Next,Bottom,Update,
+                xacc,xdesc,xfdate,xtdate
+
+		
+		
+
+		field xdesc
+		display const
+		height 1
+		end field
+	
+
+		field xyearcombo
+		attrib local
+		caption Year
+		display combo
+		pick "2019,2020,2021,2022,2023"
+		end field
+		
+		field xfdate
+		attrib local
+		caption From Date
+		default #date
+		end field
+		
+		field xtdate
+		attrib local
+		caption To Date
+		default #date
+		end field
+		
+		
+         embed onsubmit="submitit(this)"
+
+     end form
+
+      jscript myscript
+
+        <script language="javascript" type="text/javascript">
+        var but
+        var result
+
+        function clicked(b){
+          but = b.value
+        }
+        function submitit(form){
+          result = true
+          if (but == "Details"){
+            form.screen.value = "opinvdetail"
+            form.searchbutton.value = "Top"
+          }
+
+          if (but == "Special_Rate"){
+            form.screen.value = "cacusprice"
+            form.searchbutton.value = "Top"
+          }
+
+          if (but == "Modify"){
+            form.screen.value = "opinvheaderup"
+             form.searchbutton.value = "Find xinvnum=?"
+          }		  
+		  
+  if (but=="Project Flag"){
+            form.screen.value = "cacuspjdetail"
+            form.searchbutton.value = "Find xcus=?"
+          } 
+          if (but == "Credit Info"){
+            form.screen.value = "cacuscredit"
+            form.searchbutton.value = "Top"
+          }
+          return result
+        }
+        </script>
+     end jscript
+
+end screen

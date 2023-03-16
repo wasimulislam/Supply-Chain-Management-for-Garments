@@ -1,0 +1,13 @@
+product ZAB ERP
+
+table acpldetailytd
+  caption "Profit & Loss Detail"
+  columns  ztime,zutime,zauserid,zuuserid, zid,xrow,xdesc,xprime,xyear,xper,xwh,xacctype,~
+		zorg,xoffset,xcode,xacc
+
+  primary key zid,xwh,xrow
+
+  foreign key
+        zid references zbusiness.zid
+  end foreign key
+end table

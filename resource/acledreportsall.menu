@@ -1,0 +1,9 @@
+//General Ledger Reports.menu
+//-------------------------------------------------------------------
+option                           |action
+//-------------------------------------------------------------------
+Cross Year account ledger 		 |#classPath+"/login?screen=*viewcrystal acleddailyall(6;in,dt,dt,st,st,st;zid,fdate,tdate,wh,acc,sub;xdate=From Date<span>*</span>,xdate=To Date<span>*</span>,xproject=Project,xacc=Account<span>*</span>,xsub=Subaccount,xviewtype=Report View)"
+Cross Year Sub-code Trial balance |#classPath+"/login?screen=*viewcrystal actblsubdateall(4;in,dt,dt,st;zid,fdate,tdate,wh;xdate=From Date<span>*</span>=#date,xdate=To Date<span>*</span>=#date,xproject=Project,xviewtype=Report View)"
+Test Ledger Date Wise		 	 |#classPath+"/login?screen=*viewcrystal acleddailytest(8;in,dt,dt,st,st,st,in,st;zid,fdate,tdate,wh,acc,sub,year,status;xdate=From Date<span>*</span>,xdate=To Date<span>*</span>,xproject=Project,xacc=Account<span>*</span>,xsub=Subaccount,xyearcombo=Year<span>*</span>,xstatusjvrep=Status,xviewtype=Report View)"
+Test Trial Balance          	 |#classPath+"/login?screen=*viewcrystal actbldatetest(6;in,dt,dt,st,in,st;zid,fdate,tdate,wh,year,status;xdate=From Date<span>*</span>=#date,xdate=To Date<span>*</span>=#date,xproject=Project,xyearcombo=Year<span>*</span>,xstatusjvrep=Status,xviewtype=Report View)"
+

@@ -1,0 +1,14 @@
+//Accounts.menu
+//-------------------------------------------------------------------
+option                           |action
+//-------------------------------------------------------------------
+General Accounts                 |#classPath+"/login?menu=ac"                       |ac
+Accounts Receivable              |#classPath+"/login?menu=ar"                       |ar
+Accounts Payable                 |#classPath+"/login?menu=ap"                       |ap
+//	Export LC Voucher Entry          |#classPath+"/login?screen=acheaderexplc"
+//	Import LC Voucher Entry          |#classPath+"/login?screen=acheaderimplc"
+//Export LC Realization            |#classPath+"/login?screen=acordlcreal"
+//Import LC Opening                |#classPath+"/login?screen=acimplcopening"
+//Import LC Invoice                |#classPath+"/login?screen=acimplcinv"
+//-------------------------------------------------------------------
+

@@ -1,0 +1,19 @@
+//General Accounts.menu
+//-------------------------------------------------------------------
+option							|action
+//-------------------------------------------------------------------
+Master							|#classPath+"/login?menu=acmst"
+//Notifications					  |#classPath+"/login?screen=acnotification"
+Voucher Entry					|#classPath+"/login?screen=acheader"
+Petty Cash Entry				|#classPath+"/login?screen=acheadercp"
+Voucher Post 					|#classPath+"/login?screen=acheaderpost"
+Petty Cash Voucher Post 		|#classPath+"/login?screen=acheaderpostCP"
+Bank Voucher Post 				|#classPath+"/login?screen=acheaderpostbank"
+IOU Entry						|#classPath+"/login?screen=acreqheader"
+IOU Payment						|#classPath+"/login?screen=acreqheaderpay"
+IOU Final Sattlement			|#classPath+"/login?screen=acreqheadersettle"
+Reconciliation Statement 		 |#classPath+"/login?screen=acdatatable"
+Advance							|#classPath+"/login?menu=acadvance"
+Reports							|#classPath+"/login?menu=acreports"
+
+

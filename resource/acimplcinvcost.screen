@@ -1,0 +1,115 @@
+screen acimplcinvcost
+     caption "Cost Detail For "+xinvnum
+
+     sidebar list one
+     sections form one,  jscript myscript
+
+     list cost
+    	caption "Select Cost From List For: "+xinvnum
+        table xcodes
+        order xtype,xcode
+        select "xtype='LC Cost'"
+        rows 20
+        objects xcode attrib(link "abc" embed onclick="return pickItem(this)")
+        //header "Item Code","Description","Unit","Specification","Qty","Row"
+     end list
+
+     list one
+        caption "Invoice Cost List For: "+xinvnum
+        table lcinvcost
+        order xinvnum,xrow
+        fixed xinvnum
+        rows 20
+        objects xrow attrib(link "login?screen=lcinvcost&command=Show&xinvnum=?&xrow=?"), ~
+                xcostcode,xcost,xsup,org equals((select xorg from casup where zid=lcinvcost.zid and xsup=lcinvcost.xsup))
+
+				headers "Row","Code","Cost","Code","Description"
+        total "","Total",sum
+     end list
+
+     form one
+        caption "Cost Detail For "+xinvnum
+        table lcinvcost
+		primarykey xinvnum,xrow
+        order xinvnum,xrow
+        fixed xinvnum
+        //select
+        pstyle 3
+        return "login"
+        layout 2
+        objects Add, Update, Delete,Clear,Show,Complete,"<p>",~
+                xrow attrib(row 0 1),xcostcode,xsup,xorg,xcost,xlong
+
+        embed onsubmit="return submitit(this)"
+		
+        field xcostcode
+          pick list polccost
+        end field
+
+       field xlong
+          width 75
+          column 3
+        end field
+
+		field xorg
+          attrib local
+          caption Name
+          diplay constant
+          event after
+            set xorg = casup.xorg("xsup = '"+xsup+"'")+"<br>"+casup.xmadd("xsup = '"+xsup+"'")
+          end event
+        end field
+
+        field add
+        	event before
+        		if xcostcode .eq. "C & F Cost"
+        			if xsup .eq. ""
+        				error "Cannot Proceed - Please Select C & F Agent Code"
+        			end if
+				else 
+					set xsup=""
+        		end if
+        	end event
+        end field
+        
+
+        field Complete
+          embed onclick="clicked(this)"
+        end field
+
+end form
+
+     jscript myscript
+
+        <script language="javascript" type="text/javascript">
+        var but
+        var result
+
+        function clicked(b){
+          but = b.value
+        }
+        function submitit(form){
+          result = true
+          if (but == "Complete"){
+            form.screen.value = "acimplcinv"
+            form.searchbutton.value = "Find xinvnum=?"
+          }
+          return result
+        }
+        function pickItem(link){
+          if (navigator.appName.indexOf("Netscape") >= 0){
+            document.one.xcur.value=link.text
+            document.one.xexch.value=exch.text
+          }else{
+            document.one.xcostcode.value=link.innerText
+          }
+          return false
+        }
+        </script>
+     end jscript
+
+end screen
+
+
+
+

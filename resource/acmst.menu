@@ -1,0 +1,25 @@
+//General Accounts Master.menu
+//-------------------------------------------------------------------
+option                           |action
+//-------------------------------------------------------------------
+Accounts Admin             			 |#classPath+"/login?menu=acadmin" 
+Chart of Accounts                |#classPath+"/login?screen=acmst"
+//Update Budget                    |#classPath+"/login?screen=acbudup"
+Account Group                    |#classPath+"/login?screen=achrc1"
+//Exchange Rate Table              |#classPath+"/login?screen=caexch"
+//-
+Year End Processing              |#classPath+"/login?screen=acyearend"
+//Year End Processing              |#classPath+"/login?screen=acyearendbr"
+Posting                          |#classPath+"/login?screen=acpost"
+UnPosting                        |#classPath+"/login?screen=acunpost"
+Posting By Date                 |#classPath+"/login?screen=acpostdate"
+UnPosting By Date               |#classPath+"/login?screen=acunpostdate"
+//Opening Balances                 |#classPath+"/login?screen=acheaderob"
+//Account Balances                 |#classPath+"/login?screen=acbal"
+AC/GL Defaults                      |#classPath+"/login?screen=acdef"
+Account Mapping                |#classPath+"/login?screen=acpnlmapping"
+Chart of Account Serial         |#classPath+"/login?screen=acgroup"
+Duplicate Account Entry         |#classPath+"/login?screen=acduplicate"
+Duplicate Accounts Remover         |#classPath+"/login?screen=acdupliprcs"
+//-------------------------------------------------------------------
+

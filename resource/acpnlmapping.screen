@@ -1,0 +1,114 @@
+screen acpnlmapping
+
+  sidebar list detail,list grn44
+  sections form one,  jscript myscript
+
+  list detail
+    caption "Detail List"
+    table acpnlmapping
+    order xnum
+    //fixed xnum
+    rows 50
+    objects  xnum attrib(link "login?screen=acpnlmapping&command=Show&xvoucher=?&xnum=?"), ~
+             xdesc,xsign,xgroup,xtype,xnote
+			
+   // totals "","","","Total",sum,sum
+
+    headers "Map No","Description","Sign","Group","Type","Note"
+  end list
+
+  list grn
+        caption "GRN Detail List"
+        table pogrndetail
+        order xgrnnum,xrow
+        select "xgrnnum='"+xgrnnum+"'"
+        rows 20
+        objects  xrow attrib(link "login?screen=pogrndetail&command=Show&xgrnnum=?&xrow=?"), ~
+                xitem,desc equals((select xdesc from caitem where zid=pogrndetail.zid and  xitem=pogrndetail.xitem)),xqtygrn,xunitpur,~
+				xrate,xlineamt
+
+        headers "Row","Item","Description","Qty","Purchase Unit","Rate","Amount"
+		totals "","","","","Total","",sum
+	end list
+
+  form one
+    caption "Accounts Header Mapping"
+    table acpnlmapping
+    primarykey xnum
+    order xnum
+    
+    return "login"
+    layout 2
+    pstyle 3
+    objects Add,Update,Show,Clear,*next,Top,Previous,Next, Bottom,"<p>",~//Delete
+            xnum,xdesc,xsign,xgroup,xtype,xnote
+			
+
+	field xgroup
+	 caption Group
+		display combo
+		pick "G1","G2","G3","G4","G5","G6","G7","G8","G9","G10"
+	end field
+	
+	field xtype
+	caption Type
+	pick "Detail","Summary"
+	end field
+	
+	field xdesc
+	caption Description
+	width 35
+	end field
+		
+	
+
+    
+
+    
+
+    
+	
+
+    field Add
+      
+    end field
+	
+
+    field Update
+     
+    end field
+
+    embed onsubmit="submitit(this)"
+
+    field Details
+      embed onclick="clicked(this)"
+    end field
+
+    field Inventory
+      embed onclick="clicked(this)"
+    end field
+
+    field AR
+      embed onclick="clicked(this)"
+    end field
+
+  end form
+
+  jscript myscript
+    <script language="javascript" type="text/javascript">
+    var detail
+    function clicked(b){
+      detail=b.value
+      }
+      function submitit(form){
+        if (detail=="Details"){
+          form.screen.value = "acdetail"
+          form.searchbutton.value = "Find xvoucher=?"
+          //return false
+        }
+      }
+
+      </script>
+  end jscript
+
+end screen

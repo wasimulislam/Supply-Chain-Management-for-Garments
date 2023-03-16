@@ -1,0 +1,19 @@
+product ZAB ERP
+
+table acledmview
+ caption "Account Balance View For Monthly Ledger"
+ columns  zid,xvoucher,xrow,xacc,xprime,xlong,xhlong,xref,xdate,xyear,xper,xsub,xwh,xbrname
+    
+
+ primary key zid,xvoucher,xrow
+
+ foreign key
+       zid references zbusiness.zid
+ end foreign key
+
+ sql create view acledmview (zid,xvoucher,xrow,xacc,xprime,xlong,xhlong,xref,xdate,xyear,xper,xsub,xwh,xbrname)~
+                             as select zid,xvoucher,xrow,xacc,xprime,xlong,xhlong,xref,xdate,xyear,xper,xsub,xwh,~
+                             (select xlong from xcodes where xcodes.xtype='Branch' and xcodes.zid=acbal.zid and xcodes.xcode=acbal.xwh)~
+				from acbal
+                           
+end table

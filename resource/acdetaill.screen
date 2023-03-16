@@ -1,0 +1,168 @@
+screen acdetaill
+     caption "GL Voucher Details"
+//     sidebar list one
+     sections form one,  jscript myscript
+
+
+     list account
+        table acmst
+        order xacc
+        navigators alpha
+        select //"xacc like '%"+xacc+"%'"
+        rows 20
+        objects  ~
+                xacc attrib(link "abc" embed onclick="return pickAccount(this:xaccusage#:xaccsource#)"), ~
+                xaccusage attrib(name xaccusage#), xdesc
+
+
+        //headers none
+     end list
+     list one
+        caption "Detail List"
+        table acdetail
+        order xvoucher,xrow
+        fixed xvoucher
+        //select none
+        //navigators alpha
+        //,group xacc "select xacc from glmst" // where xtype = 'Country'"
+        rows 20
+        objects  xrow attrib(link "login?screen=acdetail&command=Show&xvoucher=?&xrow=?"), ~
+                xacc, xprime,xbase
+
+        totals "","Totals","","","","",sum,sum
+
+        //headers none
+     end list
+
+
+     form one
+        caption "Details of 1"+xvoucher
+        table acdetail
+        order xvoucher,xrow,xacc
+        fixed xvoucher
+        //select
+        pstyle 2
+        prow 5
+        return "login"
+        layout 2
+        objects Return,Save,Clear,Add, Update, Delete,*next,Show, Top, Previous, Next, Bottom,~
+               xrow attrib(lrow 0 10),xacc,~
+//               xrow attrib(row 0 10;search),xdum,xacc,xtempstr2 display(constant),~
+               xprime,xbase//,xlong
+
+        field xdum
+          attrib local
+          display constant
+          caption
+        end field
+
+        field xtempstr2
+          width 40
+          attrib local
+          caption Description
+          event after
+            set xtempstr2=acmst.xdesc("xacc='"+xacc+"'")
+          end event
+        end field
+
+        field xlong
+          width 100
+          height 3
+          columns 2
+        end field
+
+        field xacc
+          event after
+              set globals(xacc)=xacc
+          end event
+        end field
+
+        field xbase
+            display constant
+          event after
+            set xbase=xprime*xexch
+          end event
+        end field
+
+        field Add
+          event before
+            buffer acheader
+            move acheader=acheader(xvoucher)
+            if acheader.xstatusjv .eq. "Posted"
+              error " Voucher posted -- can not add"
+            end if
+            set account = #sql("select xacc from acmst where xacc='"+xacc+"'")
+            if xacc .ne. account .or. xacc .eq. ""
+              error "Cannot Proceed,Check The Account"
+            end if
+          end event
+          event after
+            class gltrn(acValidateAfterDetail{xvoucher,xrow,xprime,xexch})
+          end event
+        end field
+
+        field Update
+          event before
+            buffer acheader
+            move acheader=acheader(xvoucher)
+            if acheader.xstatusjv .eq. "Posted"
+              error " Voucher posted -- can not Update"
+            end if
+            set account = #sql("select xacc from acmst where xacc='"+xacc+"'")
+            if xacc .ne. account .or. xacc .eq. ""
+              error "Cannot Proceed,Check The Account"
+            end if
+          end event
+          event after
+            class gltrn(acValidateAfterDetail{xvoucher,xrow,xprime,xexch})
+          end event
+        end field
+
+        field Delete
+          event before
+            buffer acheader
+            move acheader=acheader(xvoucher)
+            if acheader.xstatusjv .eq. "Posted"
+              error " Voucher posted -- can not Delete"
+            end if
+          end event
+          event after
+            class gltrn(acValidateAfterDetail{xvoucher,xrow,xprime,xexch})
+          end event
+        end field
+
+        embed onsubmit="return submitit(this)"
+        field Return
+          embed onclick="clicked(this)"
+        end field
+
+
+
+     end form
+
+     jscript myscript
+
+        <script language="javascript" type="text/javascript">
+        var but
+        var result
+
+        function clicked(b){
+          but = b.value
+        }
+        function submitit(form){
+          result = true
+          if (but == "Return"){
+            form.screen.value = "acheader"
+            form.searchbutton.value = "Find xvoucher=?"
+          }
+              but = ''
+              return result
+        }
+        </script>
+     end jscript
+
+end screen
+
+
+
+

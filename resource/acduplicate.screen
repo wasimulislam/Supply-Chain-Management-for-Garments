@@ -1,0 +1,161 @@
+screen acduplicate
+
+     sidebar list one//,list inv
+     sections form detail,jscript myscript
+
+	
+     list one
+        caption "Account List For Delete"
+        table acduplicate
+        order xstatus desc,xacc
+       // fixed xacc
+        rows 20
+        objects  xacc attrib(link "login?screen=acduplicate&command=Show&xacc=?"), ~
+               xacctype,xacc1,xacc2,xacc3,xacc4,xacc5,xacc6,xacc7,xacc8,xacc9,xstatus,zactive
+      headers "Main Code","Account Group","Dup. Code1","Dup. Code2","Dup. Code3","Dup. Code4","Dup. Code5","Dup. Code6","Dup. Code7","Dup. Code8","Dup. Code9","Status","Active"
+	 end list
+	 
+//	  list inv1
+//        caption "Gift List For <br>"+xacc+" "+acmst.xdesc("xacc='"+xacc+"'")
+//        table cagiftitem
+//        order xacc,xqty
+//        fixed xacc
+//        rows 20
+//        objects  xgiftitem attrib(link "login?screen=cagiftitem&command=Show&xgiftitem=?&xgiftitem=?"), ~
+//		     desc equals((select xdesc from acmst where acmst.zid=cagiftitem.zid and acmst.xacc=cagiftitem.xgiftitem)),~
+//                 xqtybonus,xwh,xdateeff,xdateexp
+//
+//	  headers "Code","Description","Gift Account Qty","Brach Code","Effictive Date","Expiry Date"
+//     end list
+
+     form detail
+        caption "Duplicate Account Entry "
+        table acduplicate
+        primarykey xacc
+        order xacc
+        select //"xacctype='Finished Goods'"
+        return "login"
+        layout 2
+        pstyle 3
+        objects Add,Show,Clear,Update,Delete,*next,Top,Next,Previous, Bottom,"</b></font><p>" ,~
+                xacc,xdesc display(const),xacctype display(hide),xpkey display(hide) attrib(local),~
+				xacc1,xacc2,xacc3,xacc4,xacc5,xacc6,xacc7,xacc8,xacc9,zactive,,xlong,xstatus display(hide)
+
+
+	  
+		field xdesc
+		  caption Account Description
+          display const
+          event after
+            set xdesc = acmst.xdesc("xacc = '"+xacc+"'")
+          end event
+        end field
+	
+	field xlong
+		column 2
+	end field
+
+	field zactive
+		caption Prepared
+		defail 1
+	end field
+
+	field show
+		event after
+		set xpkey=xacc
+		end event
+    end field
+	
+	
+	field xacc
+		caption Main Account Code
+//		event after
+//			if xstatus .eq. "Deleted" .or. xacc .eq. ""
+//				set #field(delete.attrib) = "hidden"
+//				set #field(Update.attrib) = "hidden"
+//			end if
+//		end event
+		event after
+			if xstatus .eq. "Deleted"// .or. xacc .eq. ""
+				set #field(delete.attrib) = "disabled"
+				set #field(Update.attrib) = "disabled"
+			end if
+		end event
+	end field
+	
+    field add
+			event before
+			if xacc .eq. ""
+			error "Please Choose an Account Code First"
+			end if
+			set xstatus = "Open"
+			set xacctype = acmst.xacctype("xacc = '"+xacc+"'")
+			set xpkey=xacc			
+			end event
+				
+    end field
+
+
+	field Update
+		event before
+				set xacctype = acmst.xacctype("xacc = '"+xacc+"'")
+				if xpkey .ne. xacc
+				error "Please Press on Show Button First !!"	
+				end if
+		end event
+		event after
+			//set xacctype = #sql("select xacctype from acmst where xacc='"+xacc+"'")
+			//print xacctype
+		end event
+	end field
+
+		  
+	
+        embed onsubmit="return submitit(this)"
+
+end form
+
+     jscript myscript
+
+        <script language="javascript" type="text/javascript">
+        var but
+        var result
+
+        function clicked(b){
+          but = b.value
+        }
+        function submitit(form){
+          result = true
+          if (but == "Complete"){
+            form.screen.value = "opdoheader"
+            form.searchbutton.value = "Find xdornum=?"
+          }
+          return result
+        }//this:xfabrictype#:xfabrictype#:xwidth#:xgsm#:xqtydel#:xorderrow#
+        function pickItem(link,ftype,fcolor,width,gsm,prcs,qtydel,orderrow){
+          if (navigator.appName.indexOf("Netscape") >= 0){
+            document.one.xacc.value=link.text
+            document.one.xfabrictype.value=ftype.text
+            document.one.xfabriccolor.value=fcolor.text
+            document.one.xwidth.value=width.text
+            document.one.xgsm.value=gsm.text
+            document.one.xprcstype.value=prcs.text
+            document.one.xqtydel.value=qtydel.text
+            document.one.xdocrow.value=orderrow.text
+          }else{
+            document.one.xacc.value=link.innerText
+            document.one.xfabrictype.value=ftype.innerText
+            document.one.xfabriccolor.value=fcolor.innerText
+            document.one.xwidth.value=width.innerText
+            document.one.xgsm.value=gsm.innerText
+            document.one.xprcstype.value=prcs.innerText
+            document.one.xqtydel.value=qtydel.innerText
+            document.one.xdocrow.value=orderrow.innerText
+          }
+          return false
+        }
+
+        </script>
+     end jscript
+
+end screen

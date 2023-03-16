@@ -1,0 +1,15 @@
+product ZAB ERP
+
+table acpnlmapping
+
+  caption "GL Header Mapping"
+		columns ztime,zutime,zauserid,zuuserid,zid,~
+		xnum,xdesc,xsign,xgroup,xtype,xnote
+			
+		
+  primary key zid, xnum
+
+  foreign key
+        zid references zbusiness.zid
+  end foreign key
+end table

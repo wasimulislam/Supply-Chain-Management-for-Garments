@@ -1,0 +1,18 @@
+
+product ZAB ERP
+
+table acbalbankview
+  caption "Reconciliation Statement"
+  columns zid,xacc,xdesc,xvoucher,xrow,xlong,xdate,xyear,xper,xprime,zactive,xdatecom
+  primary key zid,xacc,xvoucher,xrow
+  foreign key
+        zid references zbusiness.zid
+  end foreign key
+
+  sql create view acbalbankview (zid,xacc,xdesc,xvoucher,xrow,xlong,xdate,xyear,xper,xprime,zactive,xdatecom)~
+                  as select a.zid,a.xacc,b.xdesc,a.xvoucher,a.xrow,a.xlong,a.xdate,a.xyear,a.xper,(a.xprime*-1) as xprime,~
+							a.zactive,a.xdatecom from acbal a join acmst b on a.zid=b.zid and a.xacc=b.xacc and a.xprime<0 where left(a.xvoucher,4)<>'OB--'
+							//and isnull(a.zactive,'')<>'1'
+				  
+
+end table

@@ -1,0 +1,16 @@
+product ZAB ERP
+
+table acbal
+  caption "Account Balance"
+  columns  ztime,zutime,zauserid,zuuserid, zid, xvoucher,xrow,xacc,~
+           xprime,xbase,xlong,xref,xcur,xexch,xdate,xyear,xper,xsub,xwh,xinvnum,xtype,xlcno,xhwh,xhlong,xbaserate,zactive,xdatechq,xdatecom,~
+		   xchequeno,xdeptname,xdeptcode,xnote,xdebit,xcredit,xoldsub,xoldsubdesc,xaccusage,xaccold,xgrnnum,xfileref,xstaff,xcountry,xregi,xfairexp,xaccolddesc,~
+		   xoldvoucher,xproject
+   
+
+  primary key zid,xvoucher,xrow
+
+  foreign key
+        zid references zbusiness.zid
+  end foreign key
+end table

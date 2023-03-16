@@ -1,0 +1,11 @@
+product ZAB ERP
+
+table achrc1
+  caption "GL Level 1"
+  columns ztime,zutime,zauserid,zuuserid,zid,xhrc1,xdesc,xnum,xrow,xacctype
+
+  primary key zid, xhrc1
+  foreign key
+        zid references zbusiness.zid
+  end foreign key
+end table

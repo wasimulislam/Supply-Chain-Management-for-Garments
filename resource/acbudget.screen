@@ -1,0 +1,97 @@
+screen acbudget
+
+     sidebar list one
+     sections  form one, jscript myscript
+
+     list one
+        caption "Budget Update"
+        table acbudget
+        order xyear,xper,xacc
+        rows 20
+        objects  xyear,xper,xacc attrib(link "login?screen=acbudget&command=Show&xyear=?&xper=?&xacc=?"),~
+		desc equals((select xdesc from acmst where zid=acbudget.zid and xacc=acbudget.xacc)),xprime
+
+        headers "Year","Period","Account Code","Description","Budget Amount"
+     end list
+   
+     form one
+        caption "Budget Update"
+        table acbudget
+        primarykey xyear,xper,xacc
+        order xyear,xper,xacc
+        return "login"
+        layout 5
+        pstyle  3
+        objects Add,Show,Clear,Update,Delete,*next, Top,Previous,Next, Bottom,"<p>" ,~
+               xyear,xper,xacc,xdesc,xprime
+			   
+		field xprime
+			caption Amount
+		end field
+		
+		field xdesc
+			attrib local
+			display const
+			caption Description
+			event after
+				set xdesc= acmst.xdesc("xacc='"+xacc+"'")
+			end event
+		end field
+		
+		field add
+			event before
+				if xprime == 0
+					error "Cannot Proceed -- Amount Is 0"
+				end if
+			end event
+		end field
+
+		field update
+			event before
+				if xprime == 0
+					error "Cannot Proceed -- Amount Is 0"
+				end if
+			end event
+		end field
+
+        embed onsubmit="submitit(this)"
+
+
+
+	
+     end form
+
+
+
+
+
+     jscript myscript
+
+        <script language="javascript" type="text/javascript">
+        var detail
+        function clicked(b){
+          detail=b.value
+        }
+        function budgeted(b){
+          detail="budgeted"
+        }
+        function submitit(form){
+
+	    if (detail=="Sub Code"){
+            form.screen.value = "acsub"
+            form.searchbutton.value = "Top"
+            //return false
+          }
+	    if (detail=="budgeted"){
+            form.screen.value = "glbud"
+            form.searchbutton.value = "Top"
+            //return false
+          }
+        }
+
+        </script>
+     end jscript
+
+
+
+end screen

@@ -1,0 +1,160 @@
+screen acimplcinv
+
+     sidebar list one
+     sections form one,  jscript myscript
+
+     list one
+        caption "Invoice Cost List For: "+xinvnum
+        table lcinvcost
+        order xinvnum,xrow
+        fixed xinvnum
+        rows 20
+        objects xrow attrib(link "login?screen=lcinvcost&command=Show&xinvnum=?&xrow=?"), ~
+                xcostcode,xcost,xsup,org equals((select xorg from casup where zid=lcinvcost.zid and xsup=lcinvcost.xsup))
+
+				headers "Row","Code","Cost","Code","Description"
+        total "","Total",sum
+     end list
+
+
+
+     form one
+        caption "Import LC Invoice"
+        table lcinvoice
+		primarykey xinvnum
+        order xinvnum
+        pstyle 3
+        return "login"
+        layout 2
+        objects Add,Update,Delete,Show,Clear,Ammendment,Invoice Cost,Transfer To GL,"<p>",~
+				xinvnum,xdate,xpaymentterm,xaccdesc,xlcno,xgrnnum,xsup display(const),~
+				xorg,xcur display(const),xexch,xprime,xbase display(const),xstatusjv display(hide),xvoucher display(const)
+        
+		
+		embed onsubmit="return submitit(this)"
+		field xlcno
+			pick list poordlc
+		end field
+
+		  field xaccdesc
+		  	attrib local
+		  	dispaly const
+		  	caption Description
+			event after
+				set xaccdesc=acmst.xdesc("xacc='"+xpaymentterm+"'")
+			end event
+		  end field
+
+		field xpaymentterm
+			display text
+			pick list xacc
+		end field
+
+		  
+		field xgrnnum
+			pick list xgrnnum
+		end field
+
+		field xorg
+          attrib local
+          caption Name
+          diplay constant
+          event after
+            set xorg = casup.xorg("xsup = '"+xsup+"'")+"<br>"+casup.xmadd("xsup = '"+xsup+"'")
+          end event
+        end field
+
+		field xinvnum
+				event after
+					set globals(xinvnum)=xinvnum
+					if xstatusjv .ne. "Open"
+						set #field(Transfer.display) = "hidden"
+					end if
+				end event
+			pick list poordlcinv
+		end field
+
+
+		field add
+			event before
+				double base = xprime*xexch
+				set xbase = base
+				set xtype="Import"
+				set xstatusjv="Open"
+				set xcur=lcinfo.xcus("xlcno='"+xlcno+"'")
+				set xsup=lcinfo.xsup("xlcno='"+xlcno+"'")
+				set temp = #sql("update pogrnheader set xinvnum='"+xinvnum+"' where xgrnnum='"+xgrnnum+"'")
+			end event
+		end field
+		
+        field update
+			event before
+				double base = xprime*xexch
+				set xbase = base
+			end event
+          event after
+				set temp = #sql("update pogrnheader set xinvnum='"+xinvnum+"' where xgrnnum='"+xgrnnum+"'")
+            action show
+          end event
+        end field
+
+        field Transfer
+		  event before
+			if xstatusjv .eq. "Confirmed"
+				error "Cannot Proceed -- Invoice Already Confirmed"
+			else if xpaymentterm .eq. ""
+				error "Cannot Proceed -- Please Select Payment Mode"
+			else if xgrnnum .eq. ""
+				error "Cannot Proceed -- Please Select GRN No"
+			end if
+		  end event	
+          event after
+            set temp = #spsql(zabsp_AC_transferImpLCInvoicetoGL,#id,#user,xdate,xinvnum,xlcno,xsup,xpaymentterm,xgrnnum,xbase,xexch,#wh)
+			action show
+          end event
+        end field
+
+          field Ammendment
+            embed onclick="clicked(this)"
+          end field
+
+          field Invoice
+            embed onclick="clicked(this)"
+          end field
+
+        field Complete
+          embed onclick="clicked(this)"
+        end field
+
+
+end form
+
+     jscript myscript
+
+        <script language="javascript" type="text/javascript">
+        var but
+        var result
+
+        function clicked(b){
+          but = b.value
+        }
+        function submitit(form){
+          result = true
+	        if (but=="Ammendment"){
+            form.screen.value = "polcamend"
+            form.searchbutton.value = "Top"
+          }
+        if (but=="Invoice Cost"){
+            form.screen.value = "acimplcinvcost"
+            form.searchbutton.value = "Top"
+          }
+          return result
+        }
+        </script>
+     end jscript
+
+end screen
+
+
+
+

@@ -1,0 +1,200 @@
+screen acmst
+     caption "Chart of Accounts"
+     sidebar list one
+     sections  form one, jscript myscript
+
+     list one
+        caption "Chart of Accounts"
+        table acmst
+        order xacc
+        rows 20
+        objects  xacc attrib(link "login?screen=acmst&command=Show&xacc=?"),xdesc
+
+        //headers none
+     end list
+   
+     form one
+        caption "Chart of Accounts"
+        table acmst
+        primarykey xacc
+        order xacc
+        return "login"
+        layout 2
+        pstyle 3
+        objects Add,Show,Clear,Update,Delete,*next, Top,Previous,Next, Bottom,"<p>" ,~
+               xgroup,xacctype,xacc,xdesc,xaccusage,xdum,xhrc1,xdesc1,xhrc2,xdesc2//,xhrc3,xdesc3,xhrc4,xdesc4,xhrc5,xdesc5
+               //xanc1
+field xgroup
+pick list acgroup
+end field
+
+		field xacctype
+			display const
+			//pick "Asset,Liability,Income,Expenditure"
+		end field
+
+        field xdesc1
+      		attrib local
+      		caption Description
+      		display const
+      		event after
+			      set xdesc1 = achrc1.xdesc("xhrc1='"+xhrc1+"'")
+      		end event
+        end field
+
+        field xdum
+      		attrib local
+      		caption
+      		display const
+        end field
+
+        field xdesc2
+      		attrib local
+      		caption Description
+      		display const
+      		event after
+			      set xdesc2 = achrc2.xdesc("xhrc2='"+xhrc2+"'")
+      		end event
+        end field
+
+        field xdesc3
+      		attrib local
+      		caption Description
+      		display const
+      		event after
+			      set xdesc3= achrc3.xdesc("xhrc3='"+xhrc3+"'")
+      		end event
+        end field
+
+        field xdesc4
+      		attrib local
+      		caption Description
+      		display const
+      		event after
+			      set xdesc4= achrc4.xdesc("xhrc4='"+xhrc4+"'")
+      		end event
+        end field
+
+        field xhrc2
+          pick "xhrc2"
+          event after
+            set globals(xhrc2)=xhrc2
+          end event
+        end field
+
+        field xhrc3
+          pick "xhrc3"
+          event after
+            set globals(xhrc3)=xhrc3
+          end event
+        end field
+
+        field xhrc4
+          pick "xhrc4"
+          event after
+            set globals(xhrc4)=xhrc4
+          end event
+        end field
+
+        field xhrc5
+          pick "xhrc5"
+        end field
+
+        field xacc
+         event after
+          set globals(xacc)=xacc
+         end event
+        end field
+
+        field xdesc
+		caption Head of Account
+          width 40
+        end field
+
+        field xaccusage
+	        default "Ledger"
+        end field
+
+        field Sub
+          embed onclick="clicked(this)"
+        end field
+
+        field Budget
+          embed onclick="budgeted(this)"
+        end field
+
+        embed onsubmit="submitit(this)"
+
+
+
+	field add
+		event before
+			if xdesc .eq. ""
+				error "Cannot Proceed -- Account Description is Blank"
+			else
+				int num = acgroup.xnum("xgroup='"+xgroup+"'")
+				if num == 0
+					set num = 1
+				end if
+				int group = xgroup
+				set group = group+num
+				set xacc = group
+				set num = num+1
+				set temp = #sql("update acgroup set xnum="+num+" where xgroup='"+xgroup+"'")
+				set xacctype = acgroup.xacctype("xgroup='"+xgroup+"'")
+				set xhrc1 = acgroup.xhrc1("xgroup='"+xgroup+"'")
+				set xhrc2 = acgroup.xhrc2("xgroup='"+xgroup+"'")
+				set xhrc3 = acgroup.xhrc3("xgroup='"+xgroup+"'")
+				set xhrc4 = acgroup.xhrc4("xgroup='"+xgroup+"'")
+				set xhrc5 = acgroup.xhrc5("xgroup='"+xgroup+"'")
+			end if
+		end event
+		event after
+		//	set temp=#spsql(zabsp_AC_validateAfterAcmst,#id,#user,xgroup,xdesc)
+		end event
+	end field
+
+	field delete
+		event before
+			int num = acgroup.xnum("xgroup='"+xgroup+"'")
+			set num = num-1
+			set temp = #sql("update acgroup set xnum="+num+" where xgroup='"+xgroup+"'")
+		end event
+	end field
+	
+     end form
+
+
+
+
+
+     jscript myscript
+
+        <script language="javascript" type="text/javascript">
+        var detail
+        function clicked(b){
+          detail=b.value
+        }
+        function budgeted(b){
+          detail="budgeted"
+        }
+        function submitit(form){
+
+	    if (detail=="Sub Code"){
+            form.screen.value = "acsub"
+            form.searchbutton.value = "Top"
+            //return false
+          }
+	    if (detail=="budgeted"){
+            form.screen.value = "glbud"
+            form.searchbutton.value = "Top"
+            //return false
+          }
+        }
+
+        </script>
+     end jscript
+
+
+
+end screen

@@ -1,0 +1,18 @@
+
+product ERP on the Net
+
+table acdetailview
+  caption "Ac detail View"
+  columns  zid,xvoucher,xrow,xacc,xdiv,xsec,xproj,~
+           xprime,xbase,xlong,xref,xdateref,xyear,xper,xdate
+  primary key zid,xvoucher,xrow
+  foreign key
+        zid references zbusiness.zid
+  end foreign key
+
+  sql create view acdetailview (zid, xvoucher,xrow,xacc,xdiv,xsec,xproj,xprime,xbase,xlong,xref,xdateref,xyear,xper,xdate) ~
+                  as select zid,xvoucher,xrow,xacc,xdiv,xsec,xproj,xprime,xbase,xlong,xref,xdateref,(select acheader.xyear from acheader where acdetail.xvoucher=acheader.xvoucher and acdetail.zid=acheader.zid),~
+                  (select acheader.xper from acheader where acdetail.xvoucher=acheader.xvoucher and acdetail.zid=acheader.zid),(select acheader.xdate from acheader where acdetail.xvoucher=acheader.xvoucher and acdetail.zid=acheader.zid) ~
+                  from acdetail //group by zid,xvoucher,xrow
+
+end table

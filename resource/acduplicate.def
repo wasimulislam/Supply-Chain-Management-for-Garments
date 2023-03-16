@@ -1,0 +1,14 @@
+product ZAB ERP
+
+table acduplicate
+  caption "Duplicate Account"
+  columns ztime,zutime,zauserid,zuuserid,zid, xacc,xdesc, ~
+			xacctype,xacc1,xacc2,xacc3,xacc4,xacc5,xacc6,xacc7,xacc8,xacc9,~
+			xlong,zactive,xstatus
+
+
+  primary key zid, xacc
+  foreign key
+        zid references zbusiness.zid
+  end foreign key
+end table

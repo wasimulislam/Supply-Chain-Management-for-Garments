@@ -1,0 +1,16 @@
+//General Ledger Reports.menu
+//-------------------------------------------------------------------
+option                           |action
+//-------------------------------------------------------------------From ADN 14-12-2022------------------------------------------------
+Cash/Bank Book                 		|#classPath+"/login?screen=*viewcrystal acledcashdaily(7;in,dt,dt,st,st,st,in;zid,fdate,tdate,wh,acc,sub,year;xdate=From Date<span>*</span>,xdate=To Date<span>*</span>,xproject=Project,xacc=Account<span>*</span>,xsub=Subaccount,xyearcombo=Year<span>*</span>,xviewtype=Report View)"
+Reimbursement Report           |#classPath+"/login?screen=*viewcrystal acledcashdailyreimburse(5;in,dt,dt,st,in;zid,fdate,tdate,acc,year;xdate=From Date,xdate=To Date,xacc=Account=,xyear=Year,xviewtype=Report View)"
+Reconciliation Statement	   |#classPath+"/login?screen=*viewcrystal acleddailyrsl(8;in,st,dt,dt,in,st,st,st;zid,wh,fdate,tdate,year,acc,sub,tsub;xproject=Project,xdate=From Date,xdate=To Date,xyearcombo=Year,xacc=Account=,xsub=From Subaccount,xsub=To Subaccount,xviewtype=Report View)"
+//Date Wise Accounts Ledger      		|#classPath+"/login?screen=*viewcrystal acleddaily(9;in,st,st,dt,dt,in,st,st,st;zid,wh,acgroup,fdate,tdate,year,acc,sub,tsub;xproject=Project,xgroup=Accounts Group,xdate=From Date<span>*</span>,xdate=To Date<span>*</span>,xyearcombo=Year<span>*</span>,xacc=Account<span>*</span>,xsub=From Subaccount,xsub=To Subaccount,xviewtype=Report View)"
+Daily Accounts Ledger   	   |#classPath+"/login?screen=*viewcrystal acleddaily(5;in,dt,dt,st,in;zid,fdate,tdate,acc,year;xdate=From Date,xdate=To Date,xacc=Account=,xyear=Year,xviewtype=Report View)"
+Sub-code Wise Ledger      			|#classPath+"/login?screen=*viewcrystal acleddailysub(7;in,dt,dt,in,st,st,st;zid,fdate,tdate,year,wh,acc,sub;xdate=From Date<span>*</span>,xdate=To Date<span>*</span>,xyearcombo=Year<span>*</span>,xproject=Project,xacc=Account<span>*</span>,xsub=Subaccount,xviewtype=Report View)"
+Date Wise Group Ledger         		|#classPath+"/login?screen=*viewcrystal actbldategroupdetall(7;in,st,st,dt,dt,in,st;zid,wh,acctype,fdate,tdate,year,group;xproject=Project,xacctyperep=Account Type,xdate=From Date<span>*</span>=#date,xdate=To Date<span>*</span>=#date,xyearcombo=Year<span>*</span>,xgroup=Accounts Group,xviewtype=Report View)"
+Date Wise Trail Balance          	|#classPath+"/login?screen=*viewcrystal actbldatet(5;in,dt,dt,st,in;zid,fdate,tdate,wh,year;xdate=From Date<span>*</span>=#date,xdate=To Date<span>*</span>=#date,xproject=Project,xyearcombo=Year<span>*</span>,xviewtype=Report View)"
+Ledger (comparison)      	   		|#classPath+"/login?screen=*viewcrystal acpnlbs(7;in,st,in,st,st,st,st;@zid,@wh,@year,@report,@reportfor,@paccgroup,@pacc;xproject=Project,xyearcombo=Year<span>*</span>,xrptshow=Report Showing,xrptled=Ledger,xgroup=Accounts Group,xacc=Accounts Head,xviewtype=Report View)"
+AP to GL Reconciliation     	    |#classPath+"/login?screen=*viewcrystal aptoglrecon(5;in,dt,dt,st,st;zid,fdate,tdate,acdiv,sup;xdate=From Date<span>*</span>=#date,xdate=To Date<span>*</span>=#date,xproject=Project,xsup=Supplier=,xviewtype=Report View)"
+
+

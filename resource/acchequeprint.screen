@@ -1,0 +1,223 @@
+screen acchequeprint
+
+  sidebar list one,list detail
+  sections form one,  jscript myscript
+
+   list one
+    caption "Prepared Voucher"
+    table acheader
+    order xvoucher desc
+	 select "xstatusjv='Balanced' and xstatus='Approved' and left(xvoucher,2)='BP'"
+    dtlengthmenu [10,25,50,100, -1], [10,25,50,100, "All"]
+	rows 5
+    objects  xvoucher attrib(link "login?screen=acheaderpostbank&command=Show&xvoucher=?"), ~
+             xdate,
+
+   // headers "Line No","Acc Code","Description","Sub Code","Description","Debit","Credit"//,"Amt"
+  end list
+  
+  
+  
+  
+  
+  list detail
+    caption "Detail List"
+    table acdetail
+    order xvoucher,xrow
+    fixed xvoucher
+    dtlengthmenu [10,25,50,100, -1], [10,25,50,100, "All"]
+	rows 50
+    objects  xrow,~ //attrib(link "login?screen=acdetailg&command=Show&xvoucher=?&xrow=?"), ~
+             xacc,desc equals((select xdesc from acmst where acmst.zid=acdetail.zid and acmst.xacc=acdetail.xacc)),~
+			 xsub,subdesc equals((select xorg from acsubview where zid=acdetail.zid and xsub=acdetail.xsub and xacc=acdetail.xacc)),xdebit,xcredit
+
+    totals "","","","","Total",sum,sum
+
+    headers "Line No","Acc Code","Description","Sub Code","Description","Debit","Credit"//,"Amt"
+  end list
+
+
+  form one
+    caption "Voucher Header - Cheque Print"
+    table acheader
+    primarykey xvoucher
+    order xvoucher
+    //select "xstatusjv='Balanced' and xstatus='Approved' and xper>0"
+    return "login"
+    layout 2
+    pstyle 3
+    objects Update,Show,Top,Bottom,Next,Clear,"<p>",~//Add,Delete,Detail,*next, Top,Previous,Next, Bottom,Checked,
+            xvoucher,xdate display(const),xref,xchequeno,xdatechq,xpaidto,xwh,xwhdesc,xsub display(h),xyear display(const),xper display(const),~
+            xstatusjv,xfileref,xstatus,xacpayee,xlong,xtype display(hide),xlcno display(h)
+
+	field xvoucher
+		display text
+		pick xvoucher
+		//pick xvoucherother
+	end field
+
+	field xref
+		caption Ref. to Cheque Print (A/C)
+		display combo
+		//pick xvoucher
+		pick "select xacc from acdetail where xvoucher='"+xvoucher+"'"
+	end field
+	
+	field xdatechq
+		default #date
+	end field
+	
+	field xtrn
+		display combo
+		pick "select xtrn from xtrn where xtypetrn='GL Voucher'"
+	end field
+
+    field xwh
+      display const
+	  caption Division Code
+      default "01"
+    end field
+	
+	 field xdum
+      display const
+	  attrib local
+      caption 
+    end field
+
+	field xstatus
+		caption Print Status
+      //display const
+	 // attrib local
+		display combo
+			pick "Open,Approved"
+    end field
+	
+	 field bname
+      display const
+	  attrib local
+	  caption Bank Name
+	  event after
+	  set bname=cabank.xname("xbank='"+xbank+"'")
+	  end event
+    end field
+
+    field xwhdesc
+      attrib local
+      caption Division Name
+      display const
+      event after
+        set xwhdesc=xcodes.xlong("xtype='Branch' and xcode='"+xwh+"'")
+      end event
+    end field
+
+    field xorg
+      attrib local
+      caption Customer Name
+      display const
+      event after
+        set xorg=cacus.xorg("xcus='"+xsub+"'")
+      end event
+    end field
+
+    field xlong
+      caption Header Description
+      width 80
+      height 3
+      column 2
+    end field
+
+        field xdate
+		caption Post Date
+          event before
+           set xyear=#year(xdate,acdef)
+           set xper=#per(xdate,acdef)
+          end event
+        end field
+
+    field xstatusjv
+      display constant
+    end field
+
+    field xvoucher
+	//pick xvoucherother
+      event after
+		//class careports(getjspReport{acvoucher,1,xvoucher,Print Voucher})
+        //class careports(getjspReport{accheque,1,xvoucher,Print Cheque})
+		class careports(getReport{acvoucher;2;in,st;zid,svoucher;xvoucher;Print Voucher})
+		class careports(getReport{accheque;2;in,st;zid,svoucher;xvoucher;Print Cheque})
+		//class careports(getjspReport{acchequeadj,1,xvoucher,Print Cheque(Corporate Office)})
+		set globals(xvoucher)=xvoucher
+		set globals(xwh)=xwh
+		
+        if xstatusjv .eq. "Posted"
+          set #field(Delete.attrib) = "disabled"
+         // set #field(Update.attrib) = "disabled"
+        end if
+        if xstatus .eq. "Approved"
+          set #field(Delete.attrib) = "disabled"
+          //set #field(Update.attrib) = "disabled"
+        end if
+      end event
+    end field
+		  
+		field Show
+			event after
+			set status =acheader.xstatus("xvoucher='"+xvoucher+"'")
+				if status .eq. "Approved"
+					class careports(getjspReport{accheque,1,xvoucher,Print Cheque})
+				end if
+			end event
+		end field
+
+		  
+		field Update
+            event before
+				if xstatusjv .eq. ""
+					error "Please Show voucher First"
+				end if
+				
+            end event
+            event after
+				//set status =acheader.xstatus("xvoucher='"+xvoucher+"'")
+				//if status .eq. "Approved"
+				//	class careports(getjspReport{accheque,1,xvoucher,Print Cheque})
+				//end if
+				// action show
+		   end event
+       end field
+
+
+    embed onsubmit="submitit(this)"
+
+    field Detail
+      embed onclick="clicked(this)"
+    end field
+
+    field Cheque Print
+      embed onclick="clicked(this)"
+    end field
+
+    field AR
+      embed onclick="clicked(this)"
+    end field
+
+  end form
+
+  jscript myscript
+    <script language="javascript" type="text/javascript">
+    var detail
+    function clicked(b){
+      detail=b.value
+      }
+      function submitit(form){
+        if (detail=="Detail"){
+          form.screen.value = "acdetailg"
+          form.searchbutton.value = "Find xvoucher=?"
+          //return false
+        }
+      }
+
+      </script>
+  end jscript
+
+end screen

@@ -1,0 +1,132 @@
+screen acpoordlccost
+     caption "Cost Detail For "+xlcno
+     sidebar list one,list two
+     sections form one,  jscript myscript
+
+     list one
+        caption "Cost Detail For LC No :"+xlcno
+        table lccost
+        order xlcno,xrow
+        fixed xlcno
+        rows 20
+        objects  xrow attrib(link "login?screen=acpoordlccost&command=Show&xlcno=?&xrow=?"), ~
+                xcostcode,xsup,name equals((select xorg from casup where xsup=lccost.xsup)),xnote,xcost
+
+
+        headers "Row","Cost Type","Insurance Company Code","Name","Cost"
+	   total "","Total","","","",sum
+   end list
+
+
+     form one
+        caption "Cost Detail For "+xlcno
+        table lccost
+		primarykey xlcno,xrow
+        order xlcno,xrow
+        fixed xlcno
+        //select
+        pstyle 3
+        return "login"
+        layout 2
+        objects Add, Update, Delete,Clear,Show,Complete,"<p>",~
+                xrow attrib(row 0 1),xcostcode,xsup,xorg,xnote,xcost
+                
+	
+        embed onsubmit="return submitit(this)"
+		
+        field xcostcode
+          pick list polccost
+        end field
+
+
+        field xsup
+          caption Insurance Company /C & F Agent Code
+          pick list casup
+        end field
+
+        field xdum
+          attrib local
+          display const
+          caption
+        end field
+
+        field xorg
+          attrib local
+          display const
+          caption Name
+          event after
+            set xorg=casup.xorg("xsup='"+xsup+"'")
+          end event
+        end field
+
+        field xdesc
+          attrib local
+          display const
+          event after
+            set xdesc=pocostmst.xdesc("xcostcode='"+xcostcode+"'")
+          end event
+        end field
+        
+        field add
+        	event before
+        		if xcostcode .eq. "Insurance Cost"
+        			if xsup .eq. ""
+        				error "Cannot Proceed - Please Select Insurance Company Code"
+        			end if
+        		else if xcostcode .eq. "C & F Cost"
+        			if xsup .eq. ""
+        				error "Cannot Proceed - Please Select C & F Agent Code"
+        			end if
+				else 
+					set xsup=""
+        		end if
+				if xcostcode .ne. "Insurance Cost" .or. xcostcode .ne. "C & F Cost"
+				//	set xsup=""
+				end if
+        	end event
+        end field
+        
+
+        field Complete
+          embed onclick="clicked(this)"
+        end field
+
+
+
+end form
+
+     jscript myscript
+
+        <script language="javascript" type="text/javascript">
+        var but
+        var result
+
+        function clicked(b){
+          but = b.value
+        }
+        function submitit(form){
+          result = true
+          if (but == "Complete"){
+            form.screen.value = "acimplcopening"
+            form.searchbutton.value = "Find xlcno=?"
+          }
+          return result
+        }
+        function pickSub(link){
+          if (navigator.appName.indexOf("Netscape") >= 0){
+            document.one.xinvnum.value=link.text
+            document.one.xbalance.value=primebal.text
+            document.one.xdate.value=date.text
+          }else{
+            document.one.xsub.value=link.innerText
+          }
+          return false
+        }
+        </script>
+     end jscript
+
+end screen
+
+
+
+

@@ -1,0 +1,199 @@
+screen acordlcbill
+
+     sidebar 
+     sections form one,  jscript myscript
+
+     list one
+        caption "LC Detail For :"+xlcno
+        table poorddetail
+        order xordernum,xrow
+        fixed xordernum
+        rows 20
+        objects  xrow attrib(link "login?screen=poorddetail&command=Show&xordernum=?&xrow=?"), ~
+                 xitem,desc equals((select xdesc from caitem where xitem=poorddetail.xitem)),xqtypur,xunitpur,xqtygrn
+
+
+        headers "Row","Item","Description","Qty","Unit","GRN Qty"
+     end list
+
+     form one
+        caption "LC Bill Generation"
+        table lcinfo
+		primarykey xlcno
+        order xlcno
+        //fixed xordernum
+        //select
+        pstyle 3
+        return "login"
+        layout 4
+        objects Update,Show,Clear,Complete,Transfer To GL,"<p>",~
+               xlcno,xbilldate,xcur display(const),xexch,xavlperc,xbillno,xbillamt,xprime,xnegotiateamt,xbase,~
+			   xlcissuedate display(const),xfdbcno,xfdbcdate,xfbpno,xfbpdate,xshipdate display(const),xexpirydate display(const),~
+			   xmaturitydate display(const),xcus display(const),xorg,xstatusjv display(const),xdocnum display(const),~
+			   xvoucher display(const),xadvisingbank display(const),xadvdesc
+		  
+		  field xbillamt
+			captoin LC Purchase Anount
+		  end field
+			
+		  field xprime
+			captoin LC Value
+		  end field
+			
+		field xdocnum
+			caption Bill Receive Voucher No
+		end field
+		
+		field xvoucher
+			caption Bill Realization Voucher No
+		end field
+		
+        embed onsubmit="return submitit(this)"
+	field xprime
+		caption Amount in foreign currency
+	end field
+	
+	
+    field xlcno
+      event after
+        if xstatusjv .ne. "Open"
+          set #field(Transfer.display) = "hidden"
+        end if
+      end event
+	  pick list opordlc
+	end field
+
+
+
+
+
+
+		field xorg
+          attrib local
+          caption Name
+          diplay constant
+          event after
+            set xorg = cacus.xorg("xcus = '"+xcus+"'")+"<br>"+cacus.xmadd("xcus = '"+xcus+"'")
+          end event
+        end field
+
+		  
+		  field xopenbank
+			captoin Open Bank Code
+			//pick 
+		  end field
+		  
+		  field xdum
+		  	attrib local
+		  	dispaly const
+		  	caption 
+		  end field
+
+		  field xswiftcode
+		  	attrib local
+		  	dispaly const
+		  	caption Swift Code
+		  	event after
+		  		set xopdesc=cabank.xswiftcode("xbank='"+xopenbank+"'")
+		  	end event
+		  end field
+
+
+		  field xopdesc
+		  	attrib local
+		  	dispaly const
+		  	caption Bank Name
+		  	event after
+		  		set xopdesc=cabank.xname("xbank='"+xopenbank+"'")+"<br>"+cabank.xbranch("xbank='"+xopenbank+"'")+"<br>"+cabank.xmadd("xbank='"+xopenbank+"'")+"<br>"+cabank.xswiftcode("xbank='"+xopenbank+"'")
+		  	end event
+		  end field
+
+		  field xadvdesc
+		  	attrib local
+		  	dispaly const
+		  	caption Bank Name
+		  	event after
+		  		set xadvdesc=cabank.xname("xbank='"+xadvisingbank+"'")+"<br>"+cabank.xbranch("xbank='"+xadvisingbank+"'")+"<br>"+cabank.xmadd("xbank='"+xadvisingbank+"'")+"<br>"+cabank.xswiftcode("xbank='"+xadvisingbank+"'")
+		  	end event
+		  end field
+
+
+        field update
+			event before
+				set xbase=xprime*xexch
+				if xavlperc > 0
+					//set xbillamt=xbase*xavlperc
+					//set xbillamt = xbillamt/100
+				end if	
+			end event
+			
+          event after
+            //set temp = #spsql(zabsp_AC_validateAfterExportLCBill,#id,#user,xlcno,xavlperc,xprimetotamt,xexch)
+            action show
+          end event
+        end field
+
+        field Transfer
+		  event before
+			if xstatusjv .ne. "Open"
+				error "Cannot Proceed -- Bill Already Transferred"
+			else if cabank.xacc("xbank='"+xadvisingbank+"'") .eq. ""
+				error "Cannot Proceed Chart of Account Not Mapped with Bank Code in Bank Name Entry"
+			end if
+		  end event	
+          event after
+            set temp = #spsql(zabsp_AC_transferLCBilltoGL,#id,#user,xbilldate,xlcno,xbillamt,xcus,xadvisingbank,#wh)
+			action show
+          end event
+        end field
+	
+
+          field Ammendment
+            embed onclick="clicked(this)"
+          end field
+
+          field LC
+            embed onclick="clicked(this)"
+          end field
+
+        field Complete
+          embed onclick="clicked(this)"
+        end field
+
+
+
+end form
+
+     jscript myscript
+
+        <script language="javascript" type="text/javascript">
+        var but
+        var result
+
+        function clicked(b){
+          but = b.value
+        }
+        function submitit(form){
+          result = true
+          if (but == "Complete"){
+            form.screen.value = "opordlcheader"
+            form.searchbutton.value = "Find xordernum=?"
+          }
+	        if (but=="Ammendment"){
+            form.screen.value = "polcamend"
+            form.searchbutton.value = "Top"
+          }
+        if (but=="LC Cost"){
+            form.screen.value = "poordcost"
+            form.searchbutton.value = "Top"
+          }
+          return result
+        }
+        </script>
+     end jscript
+
+end screen
+
+
+
+

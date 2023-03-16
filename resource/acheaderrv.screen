@@ -1,0 +1,212 @@
+screen acheaderrv
+
+  sidebar list detail,list grn
+  sections form one,  jscript myscript
+
+   list detail
+    caption "Detail List"
+    table acdetail
+    order xvoucher,xrow
+    fixed xvoucher
+    rows 20
+    objects  xrow, ~
+             xacc,desc equals((select xdesc from acmst where acmst.zid=acdetail.zid and acmst.xacc=acdetail.xacc)), xdebit,xcredit,xbase//,xprime
+
+    totals "","","Total",sum,sum,sum
+
+    headers "Line No","Acc Code","Description","Debit","Credit","Base Amount"//,"Amt"
+  end list
+
+  list grn
+        caption "GRN Detail List"
+        table pogrndetail
+        order xgrnnum,xrow
+        select "xgrnnum='"+xgrnnum+"'"
+        rows 20
+        objects  xrow, ~
+                xitem,desc equals((select xdesc from caitem where zid=pogrndetail.zid and  xitem=pogrndetail.xitem)),xqtygrn,xunitpur,~
+				xrate,xlineamt
+
+        headers "Row","Item","Description","Qty","Purchase Unit","Rate","Amount"
+		totals "","","","","Total","",sum
+	end list
+
+  form one
+    caption "Accounts Header: RV"
+    table acheader
+    primarykey xvoucher
+    order xvoucher
+//	fixed xvoucher
+	//select "xper>0"
+	select "left(xvoucher,2)='RV' and xper>0"
+    return "login"
+    layout 2
+    pstyle 3
+    objects Show,Update,Delete,Clear,*next,Return,"<p>",~
+            xvoucher,xdate,xchequeno,xcur,xref,xvouchertype display(h),xexch,xstatusjv,xyear display(const),xper display(const),~
+            xdornum,xsub display(const),xorg,xgrnnum,xlong,~
+			//hide
+			xwh display(hide),xbrname display(hide),~
+			xlcno display(h),xtrn display(hide),xtype display(hide)
+
+	field xgrnnum
+		caption GRN No
+		display const
+	end field
+	
+	field xdornum
+		caption MR No.
+		display const
+	end field
+	
+	field xref
+		caption Reference 
+	end field
+
+    field xwh
+      //display const
+	  caption Branch Code
+      default #wh
+    end field
+
+	field xvoucher
+		pick list xvoucherrv
+		display text
+	end field
+	
+    field xvouchertype
+      //display const
+	  caption Mode of Voucher
+	  pick ",Cash,Cheque"
+      default 
+    end field
+	
+    field xbrname
+      attrib local
+      caption Branch Name
+      //display const
+      event after
+        set xbrname=xcodes.xlong("xtype='Branch' and xcode='"+xwh+"'")
+      end event
+    end field
+
+    field xorg
+      attrib local
+      caption Name
+      display const
+      event after
+        set xorg=cacus.xorg("xcus='"+xsub+"'")
+      end event
+    end field
+
+    field xlong
+      caption Header Description
+      width 80
+      height 3
+      column 2
+    end field
+
+        field xdate
+          event before
+           set xyear=#year(xdate,acdef)
+           set xper=#per(xdate,acdef)
+          end event
+        end field
+
+    field xdateref
+      display constant
+    end field
+
+    field xstatusjv
+      display constant
+    end field
+
+    field xvoucher
+      event after
+		class careports(getjspReport{acvoucher,1,xvoucher,Print Voucher})
+        set globals(xvoucher)=xvoucher
+        if xstatusjv .eq. "Posted"
+          set #field(Delete.attrib) = "disabled"
+          set #field(Update.attrib) = "disabled"
+        end if
+		if xgrnnum .eq. ""
+          set #field(xgrnnum.display) = "hidden"
+		end if
+		if xsub .eq. ""
+          set #field(xsub.display) = "hidden"
+          set #field(xorg.display) = "hidden"
+		end if
+      end event
+    end field
+
+    field clear
+      event after
+        set #field(Details.display) = "hidden"
+        set #field(Delete.attrib) = "disabled"
+        set #field(Update.attrib) = "disabled"
+      end event
+    end field
+
+    field Add
+      event before
+		//set xexch = xcur.xexch("xcur='"+xcur+"'")
+		set xtype = ""
+		set xlcno = ""
+		set xsub = ""
+		set xtrn = xvoucher_ONE
+        set xstatusjv="Balanced"
+        //if xvoucher_ONE .eq. "OB--"
+        //  error "Cannot Proceed -- You Choose Transaction Code For Openning Balance "+xvoucher_ONE
+        //end if
+        class gltrn(acValidateBeforeHeader{xyear,xper})
+      end event
+    end field
+
+    field update
+      event before
+		//set xtrn = xvoucher_ONE		
+      end event
+	  event after
+        //set temp = #spsql(sp_validateAfterHeaderAC,#id,#user,xvoucher)	
+		action show
+      end event
+    end field
+
+    embed onsubmit="submitit(this)"
+
+    field Details
+      embed onclick="clicked(this)"
+    end field
+
+    field Inventory
+      embed onclick="clicked(this)"
+    end field
+
+    field Return
+      embed onclick="clicked(this)"
+    end field
+
+  end form
+
+  jscript myscript
+    <script language="javascript" type="text/javascript">
+    var detail
+    function clicked(b){
+      detail=b.value
+      }
+      function submitit(form){
+        if (detail=="Details"){
+          form.screen.value = "acdetail"
+          form.searchbutton.value = "Find xvoucher=?"
+          //return false
+        }
+		if (detail == "Return"){
+            form.screen.value = "arcasupadmin"
+            form.searchbutton.value = "Find xvoucher=?"
+          }
+      }
+
+      </script>
+  end jscript
+
+end screen

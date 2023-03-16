@@ -1,0 +1,181 @@
+screen acimplcopening
+
+     sidebar list one
+     sections form one,  jscript myscript
+
+     list one
+        caption "LC Opening Cost"
+        table lccost
+        order xlcno,xrow
+        fixed xlcno
+        rows 20
+        objects xrow attrib(link "login?screen=acpoordlccost&command=Show&xlcno=?&xrow=?"), ~
+                xcostcode,xsup,name equals((select xorg from casup where xsup=lccost.xsup)),xnote,xcost
+
+        headers "Row","Cost Type","Insurance Company Code","Name","Cost"
+	   total "","Total","","","",sum
+	end list
+
+
+     form one
+        caption "Import LC Info"
+        table lcinfo
+		primarykey xlcno
+        order xlcno
+		select "xtype='Import'"
+        pstyle 3
+        return "login"
+        layout 2
+        objects Add,Update,Delete,Show,Clear,Ammendment,LC Opening Cost,Transfer To GL,"<p>",~
+               xlcno,xlcissuedate,xpaymentterm,xaccdesc,xsup,xorg,xcur,xexch,xprime,xbase,xlcmargin,~
+			   xshipdate,xexpirydate,xmaturitydate,xopenbank,xopdesc,xadvisingbank,xadvdesc,~
+			   xstatusjv display(hide),~
+			   xprimetotamt display(hide),xtype display(hide),xvoucher display(const)
+				
+        embed onsubmit="return submitit(this)"
+
+		field xpaymentterm
+			display text
+			pick list xacc
+		end field
+			
+			field xlcno
+				event after
+					set globals(xlcno)=xlcno
+					if xstatusjv .ne. "Open"
+						set #field(Transfer.display) = "hidden"
+					end if
+				end event
+				pick list poordlc
+			end field
+		  
+		  field xopenbank
+			captoin Open Bank Code
+			//pick 
+		  end field
+		  
+		field xorg
+          attrib local
+          caption Name
+          diplay constant
+          event after
+            set xorg = casup.xorg("xsup = '"+xsup+"'")+"<br>"+casup.xmadd("xsup = '"+xsup+"'")
+          end event
+        end field
+
+		  field xaccdesc
+		  	attrib local
+		  	dispaly const
+		  	caption Description
+			event after
+				set xaccdesc=acmst.xdesc("xacc='"+xpaymentterm+"'")
+			end event
+		  end field
+
+		  field xswiftcode
+		  	attrib local
+		  	dispaly const
+		  	caption Swift Code
+		  	event after
+		  		set xopdesc=cabank.xswiftcode("xbank='"+xopenbank+"'")
+		  	end event
+		  end field
+
+
+		  field xopdesc
+		  	attrib local
+		  	dispaly const
+		  	caption Bank Name
+		  	event after
+		  		set xopdesc=cabank.xname("xbank='"+xopenbank+"'")+"<br>"+cabank.xbranch("xbank='"+xopenbank+"'")+"<br>"+cabank.xmadd("xbank='"+xopenbank+"'")+"<br>"+cabank.xswiftcode("xbank='"+xopenbank+"'")
+		  	end event
+		  end field
+
+		  field xadvdesc
+		  	attrib local
+		  	dispaly const
+		  	caption Bank Name
+		  	event after
+		  		set xadvdesc=cabank.xname("xbank='"+xadvisingbank+"'")+"<br>"+cabank.xbranch("xbank='"+xadvisingbank+"'")+"<br>"+cabank.xmadd("xbank='"+xadvisingbank+"'")+"<br>"+cabank.xswiftcode("xbank='"+xadvisingbank+"'")
+		  	end event
+		  end field
+
+		field add
+			event before
+				set xbase = xprime*xexch
+				set xtype="Import"
+				//set xbilldate=#date
+				//set xrealdate=#date
+				set xstatusjv="Open"
+				set xtotprimeamt=xprime
+			end event
+		end field
+		
+        field update
+			event before
+				set xbase = xprime*xexch
+			end event
+          event after
+            //set temp = #spsql(zabsp_PO_validateAfterLCInfo,#id,#user,xordernum,xexch)
+            action show
+          end event
+        end field
+
+        field Transfer
+		  event before
+			if xstatusjv .eq. "Confirmed"
+				error "Cannot Proceed -- LC Already Confirmed"
+			else if xpaymentterm .eq. ""
+				error "Cannot Proceed -- Please Select Payment Mode"
+			end if
+		  end event	
+          event after
+            set temp = #spsql(zabsp_AC_transferImpLCOpeningltoGL,#id,#user,xlcissuedate,xlcno,xlcmargin,xsup,xpaymentterm,#wh)
+			action show
+          end event
+        end field
+
+		field Ammendment
+            embed onclick="clicked(this)"
+          end field
+
+          field LC
+            embed onclick="clicked(this)"
+          end field
+
+        field Complete
+          embed onclick="clicked(this)"
+        end field
+
+
+end form
+
+     jscript myscript
+
+        <script language="javascript" type="text/javascript">
+        var but
+        var result
+
+        function clicked(b){
+          but = b.value
+        }
+        function submitit(form){
+          result = true
+	        if (but=="Ammendment"){
+            form.screen.value = "polcamend"
+            form.searchbutton.value = "Top"
+          }
+        if (but=="LC Opening Cost"){
+            form.screen.value = "acpoordlccost"
+            form.searchbutton.value = "Top"
+          }
+          return result
+        }
+        </script>
+     end jscript
+
+end screen
+
+
+
+
