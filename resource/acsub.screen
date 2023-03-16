@@ -1,0 +1,57 @@
+screen acsub
+     caption "Sub Account"
+     sidebar list one
+     sections form one, jscript myscript
+
+  	 list one
+        caption "Sub Code For Account No: "+xacc
+        table acsub
+        order xacc,xsub
+        fixed xacc
+        rows 20
+        objects  xsub attrib(link "login?screen=acsub&command=Show&xacc=?&xsub=?"), ~
+                xdesc
+     end list
+
+
+
+     form one
+        caption "S<ACRONYM>ub</ACRONYM> C<ACRONYM>ode</ACRONYM> F<ACRONYM>or</ACRONYM> A<ACRONYM>ccount</ACRONYM> N<ACRONYM>o: "+xacc+"</ACRONYM>"
+        table acsub
+        primarykey xacc,xsub
+        order xacc,xsub
+        fixed xacc
+        return "login"
+        layout 2
+        pstyle 3
+        objects "<b>Sub Code for Control <font color=white >"+xacc,"</font></b><p><br>",~
+                Return, ~
+               Show,Clear,Add, Update, Delete,*next, Top, Bottom,"" ,~
+               xsub,xdesc width(50)
+
+
+        embed onsubmit="submitit(this)"
+
+        field Return
+          embed onclick="clicked(this)"
+        end field
+     end form
+
+     jscript myscript
+
+        <script language="javascript" type="text/javascript">
+        var but = ""
+        function clicked(b){
+          but = b.value
+        }
+        function submitit(form){
+          if (but == "Return"){
+            form.screen.value = "acmst"
+            form.searchbutton.value = "Find xacc=?"
+          }
+        }
+
+        </script>
+     end jscript
+
+end screen

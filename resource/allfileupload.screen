@@ -1,0 +1,113 @@
+screen allfileupload
+
+     sections form one,jscript myscript
+
+     form one
+        caption "All File Upload"
+        order
+        return "login"
+        layout 2
+        pstyle 3
+      //  objects Clear,Upload,Confirm,Delete_Upload,"<p>" ,~
+		objects Clear,Upload,"<p>" ,~
+                xtype,xfile,zactive,xnote
+				
+				//,zactive,xnum,xnote
+
+        field xrate
+          caption Rate For Bonus/IPO
+        end field
+
+        field xnum
+          caption Last Code No.
+        end field
+		
+        field zactive
+          caption Auto Code
+		  display combo
+		  pick "Yes, No"
+			default "No"
+        end field
+
+        field xnote
+          caption Path
+		  width 60
+			column 2
+        end field
+
+        field xtype
+         // pick "select xtype from xcodes where zactive='1'"
+		 pick "Customer,Employee,Supplier,Item/Product,Closing Stock"
+          display combo
+          event after
+		  class careports(getjspReport{pdfiletemp,0,Check Uploaded File})
+        //     class careports(getaspReport{bmtransactiontemp,0,Check Daily Trading})
+        //     class careports(getjspReport{bmtransactionbonustemp,0,Check CDBL Bonus And IPO})
+        //     class careports(getjspReport{bmmemberinfotemp,0,Check Client Info})
+          end event
+        end field
+
+    field upload
+		event before
+			if zactive .eq. "No"
+				set temp = #spsql(zabsp_ALL_file_Upload,#id,#user,xtype,xfile)
+				//print zactive
+		//	else
+		//		set temp = #spsql(zabsp_ALL_file_Upload_Auto_Code,#id,xtype,xfile)
+				//print zactive
+			end if
+		end event	
+	 end field
+
+ 
+		field Confirm
+          event after
+            set temp = #spsql(sp_confirmUpload,#id,#user,xtype,xrate,xcomm)
+          end event
+        end field
+
+        field Delete_Upload
+          event after
+            set temp = #spsql(sp_deleteUpload,#id,#user,xtype,#wh)
+          end event
+        end field
+
+
+
+        embed onsubmit="return submitit(this)"
+
+
+     end form
+
+
+     jscript myscript
+
+        <script language="javascript" type="text/javascript">
+        var detail
+        var result
+        function clicked(b){
+          detail=b.value
+        }
+        function submitit(form){
+          result = true
+          if (detail=="Bonus"){
+            form.screen.value = "caitembonus"
+            form.searchbutton.value = "Find xitem=?"
+          }
+          if (detail=="Cost Price"){
+            form.screen.value = "caitemcostprice"
+            form.searchbutton.value = "Find xitem=?"
+          }
+          if (detail=="Sell Price"){
+            form.screen.value = "caitemprice"
+            form.searchbutton.value = "Find xitem=?"
+          }
+
+          detail = ''
+          return result
+        }
+        </script>
+     end jscript
+
+
+end screen

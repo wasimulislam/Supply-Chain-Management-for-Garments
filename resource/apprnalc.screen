@@ -1,0 +1,172 @@
+screen apprnalc
+     caption "AR Allocation"
+     sidebar list unallopay,detail
+     sections form one,jscript myscript
+
+
+	list unallopay
+		caption "Unallocated Payment List"
+		table arhed
+		order xvoucher,xdocnum
+		select "left(xvoucher,4)='PRAD' and xbalprime>0"
+		fixed xcus
+		dtlengthmenu [10,25,50,100, -1], [10,25,50,100, "All"]
+		rows 50
+		objects xvoucher attrib(link "abc" embed onclick="return pickDetail(this:xprime#:xdate#:xdocnum#)"), ~
+				xdocnum attrib(name xdocnum#),xgrnnum,xprime attrib(name xprime#),xdate attrib(name xdate#)
+		totals "Total","",sum,""
+		headers "Voucher No","PRN No","GRN No","Amount","Date"
+	end list
+	
+     list detail
+        caption "<center><b>"Allocated PRN List"</b></center>"
+        table apprnalc
+        order xvoucher,xinvnum
+        fixed xvoucher
+        dtlengthmenu [10,25,50,100, -1], [10,25,50,100, "All"]
+		rows 100
+        objects ~
+        xinvnum attrib(link "login?screen=apprnalc&command=Show&xvoucher=?&xinvnum=?"), ~
+		xdocnum,xamount,xdate
+		
+        headers "PRAD No","PRN No","Amount","Date"
+		total "Total","",sum,""
+     end list
+
+     form one
+        caption "AP PRN Allocation with "+xvoucher+"
+        table apprnalc
+        primarykey xvoucher,xinvnum
+        order xvoucher,xinvnum
+        fixed xvoucher
+        return "login"
+        pstyle 3
+        layout 2
+        objects Return,Clear,Show,Add,Delete,*next, Top, Bottom,~
+				xinvnum attrib(readonly),xdocnum attrib(readonly),xamount attrib(readonly),xdate
+
+        field xinvnum
+          pick
+        end field
+		
+		field xdocnum
+		wide 30
+		  caption PRN No
+          pick
+        end field
+		
+        field xamount
+          caption Paid Amount
+        end field
+
+        field Add
+          event before
+			//set xdocnum = #sql("select xdocnum from arhed where xvoucher='"+xinvnum+"'")
+			double alcamt = 0.00
+			set alcamt = #sesql("select sum(xamount) from apprnalc where zid = '"+#id+"' and xinvnum='"+xinvnum+"'")
+          end event
+          event after
+		  set statusjv=arhed.xstatusjv("xvoucher='"+xvoucher+"'")
+			//double alcamt = 0.00
+			double balprime = 0.00
+			double vataitamt = 0.00
+			double primeamt = 0.00
+			double prntotamt = 0.00
+			//set alcamt = #sesql("select sum(xamount) from apprnalc where zid = '"+#id+"' and xinvnum='"+xinvnum+"'")
+			//set balprime = #sesql("select sum(xbalprime) from arhed where zid = '"+#id+"' and xvoucher='"+xinvnum+"'")
+			//set primeamt=balprime-alcamt
+			//set vataitamt = #sesql("select xvatamt+xaitamt from arhed where zid = '"+#id+"' and xvoucher='"+xvoucher+"'")
+			//set primeamt=alcamt-vataitamt
+            //set temp = #sesql("update arhed set zutime=getdate(),zuuserid='"+#user+"',xbalprime=0.00 where zid='"+#id+"' and xvoucher='"+xinvnum+"'")
+			set prntotamt = #sql(double,"select sum(xamount) from apprnalc where xvoucher='"+xvoucher+"'")
+			set temp = #sesql("update arhed set zutime=getdate(),zuuserid='"+#user+"',xprnamt='"+prntotamt+"' where zid='"+#id+"' and xvoucher='"+xvoucher+"'")
+			//if primeamt<=0.00
+			//print primeamt
+			//print prntotamt
+			//set temp = #sesql("update arhed set zutime=getdate(),zuuserid='"+#user+"',xprime="+prntotamt+",xbase="+prntotamt+" where zid = '"+#id+"' and xvoucher='"+xvoucher+"'")
+			set temp = #sesql("update arhed set zutime=getdate(),zuuserid='"+#user+"',xbalprime="+alcamt+",xbase="+alcamt+" where zid = '"+#id+"' and xvoucher='"+xinvnum+"'")
+			//print prntotamt
+			//end if
+			// if primeamt>0.00
+			//set primeamt=primeamt-prntotamt
+			//print primeamt
+			//set temp = #sesql("update arhed set zutime=getdate(),zuuserid='"+#user+"',xprime="+primeamt+",xbase="+primeamt+" where zid = '"+#id+"' and xvoucher='"+xvoucher+"'")
+			//end if
+
+          end event
+        end field
+		
+        field delete
+          event before
+          end event
+          event after
+			double alcamt = 0.00
+			double vataitamt = 0.00
+			double primeamt = 0.00
+			//set alcamt = #sesql("select sum(xamount) from aralc where zid = '"+#id+"' and xvoucher='"+xvoucher+"'")
+			//set vataitamt = #sesql("select xvatamt+xaitamt from arhed where zid = '"+#id+"' and xvoucher='"+xvoucher+"'")
+			//set primeamt=alcamt-vataitamt
+			//set temp = #sesql("update arhed set zutime=getdate(),zuuserid='"+#user+"',xbalprime='"+xamount+"' where zid='"+#id+"' and xvoucher='"+xinvnum+"'")
+			set prntotamt = #sql(double,"select sum(xamount) from apprnalc where xvoucher='"+xvoucher+"'")
+			set temp = #sesql("update arhed set zutime=getdate(),zuuserid='"+#user+"',xprnamt='"+prntotamt+"' where zid='"+#id+"' and xvoucher='"+xvoucher+"'")
+			//if primeamt<=0.00
+			//print primeamt
+			//set temp = #sesql("update arhed set zutime=getdate(),zuuserid='"+#user+"',xprime="+prntotamt+",xbase="+prntotamt+" where zid = '"+#id+"' and xvoucher='"+xvoucher+"'")
+			set temp = #sesql("update arhed set zutime=getdate(),zuuserid='"+#user+"',xbalprime="+xamount+",xbase="+xamount+" where zid = '"+#id+"' and xvoucher='"+xinvnum+"'")
+			//end if
+			// if primeamt>0.00
+			//set primeamt=primeamt-prntotamt
+			//set temp = #sesql("update arhed set zutime=getdate(),zuuserid='"+#user+"',xprime="+primeamt+",xbase="+primeamt+" where zid = '"+#id+"' and xvoucher='"+xvoucher+"'")
+			//end if
+            action Show
+          end event
+        end field
+
+
+        embed onsubmit="return submitit(this)"
+
+        field Return
+          embed onclick="clicked(this)"
+        end field
+
+     end form
+
+     jscript myscript
+
+        <script language="javascript" type="text/javascript">
+        var but
+        var result
+
+        function clicked(b){
+          but = b.value
+        }
+        function submitit(form){
+          result = true
+          if (but == "Return"){
+            form.screen.value = "appayment"
+            form.searchbutton.value = "Find xvoucher=?"
+          }
+        }
+
+        function pickDetail(link,primebal,date,prnno){
+          if (navigator.appName.indexOf("Netscape") >= 0){
+            document.one.xinvnum.value=link.text
+            document.one.xamount.value=primebal.text
+            document.one.xdate.value=date.text
+			document.one.xdocnum.value=prnno.text
+          }else{
+            document.one.xinvnum.value=link.innerText
+            document.one.xamount.value=primebal.innerText
+            document.one.xdate.value=date.innerText
+			document.one.xdocnum.value=prnno.innerText
+          }
+          return false
+        }
+        </script>
+     end jscript
+
+end screen
+
+
+
+

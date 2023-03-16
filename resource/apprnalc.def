@@ -1,0 +1,13 @@
+product ZAB
+
+table apprnalc
+  caption "AP PRN Allocation"
+  columns  ztime,zutime, zid,zauserid,zuuserid,~
+           xvoucher,xinvnum,xdate,xamount,xdocnum,xnote
+
+  primary key zid, xvoucher,xinvnum
+  foreign key
+        zid references zbusiness.zid
+        zid,xvoucher references arhed.zid,xvoucher
+  end foreign key
+end table

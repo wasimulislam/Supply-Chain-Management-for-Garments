@@ -1,0 +1,11 @@
+//AP Ledger Reports.menu
+//-------------------------------------------------------------------
+option                           |action
+//-------------------------------------------------------------------
+//--------------------------------------FROM UHL-----------03-11-2022----------------------------------------------
+Supplier Ledger                  |#classPath+"/login?screen=*viewcrystal apleddetail(4;in,st,dt,dt;zid,cus,fdate,tdate;xsup=Supplier=,xdate=From Date=#date,xdate=To Date=#date,xviewtype=Report View)"
+Summary Supplier Ledger        |#classPath+"/login?screen=*viewcrystal apsummary(5;in,dt,dt,st,st;zid,fdate,tdate,xcus,wh;xdate=From Date<span>*</span>=#date,xdate=To Date<span>*</span>=#date,xsup=Supplier=,xhide=Hide,xviewtype=Report View)"
+AP Ageing Report Summary       |#classPath+"/login?screen=*viewcrystal apagesummarybyinv(3;in,st,st;@zid,@tdate,@sup;xdate=Date<span>*</span>,xsup=Supplier ID ,xviewtype=Report View)"
+AP Ageing Report Detail        |#classPath+"/login?screen=*viewcrystal apageingdetailbyinv(3;in,st,st;@zid,@tdate,@cus;xdate=Date<span>*</span>,xsup=Supplier ID<span>*</span> ,xviewtype=Report View)"
+Unallocated MR / PM List       |#classPath+"/login?screen=*viewcrystal arunallocate(5;in,st,st,dt,dt;zid,sup,type,fdate,tdate;xcus=Supplier/Customer,xtypetrnrep=Type<span>*</span>,xdate=From Date<span>*</span>,xdate=To Date<span>*</span>, xviewtype=Report View)"
+Supplier List                  |#classPath+"/login?screen=*viewcrystal supplierlist(3;in,st,st;zid,gsup,supcat;xgsup=Supplier Group,xsupcat=Supplier Category,xviewtype=Report View)"

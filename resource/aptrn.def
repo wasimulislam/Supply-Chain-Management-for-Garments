@@ -1,0 +1,14 @@
+product ERP on the Net
+
+table aptrn
+  caption "AP Detail"
+  columns  ztime,zutime,zauserid, zid,~
+           xvoucher,xrow,xacc,xdiv,xsec,xproj,xlong,~
+           xprime,xbase,xexch,xsign
+
+  primary key zid, xvoucher,xrow
+  foreign key
+        zid references zbusiness.zid
+        zid,xvoucher references arhed.zid,xvoucher
+  end foreign key
+end table

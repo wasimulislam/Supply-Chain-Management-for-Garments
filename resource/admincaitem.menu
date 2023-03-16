@@ -1,0 +1,13 @@
+//admincaitem.menu
+//-------------------------------------------------------------------
+option                           |action
+//-------------------------------------------------------------------
+Product Master -Admin                  |#classPath+"/login?screen=caitemrmadmin" 
+//Other Products -Admin               |#classPath+"/login?screen=caitemspareadmin"
+COST Products -Admin               |#classPath+"/login?screen=caitemcostadmin"
+
+
+
+
+
+//-------------------------------------------------------------------

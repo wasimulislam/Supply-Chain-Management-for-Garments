@@ -1,0 +1,286 @@
+screen apalc
+     caption "AR Allocation"
+     sidebar list invoice,list allocation
+     sections form one,jscript myscript
+
+
+     list invoice
+        caption "<br><center><b>"Unallocated Voucher List"</b>"
+        table apallocationarcview
+        order xcus,xrow
+        fixed xcus
+        select "xprime> 0"
+        dtlengthmenu [10,25,50,100, -1], [10,25,50,100, "All"]
+		rows 250
+        objects ~
+        xvoucher attrib(link "abc" embed onclick="return pickDetail(this:xprime#:xdate#)"), ~
+        xprime attrib(name xprime#),xdate attrib(name xdate#),xwh,xrow display(h)
+		
+		totals "Total",sum,"",""
+        headers "Invoice Number","Balance","Date","Outlet",""
+     end list
+
+     list allocation
+        caption "<br><center><b>"Allocated Voucher List"</b>"
+        table apalcarcview
+        order xvoucher,xinvnum
+        fixed xvoucher
+        dtlengthmenu [10,25,50,100, -1], [10,25,50,100, "All"]
+		rows 100
+        objects ~
+        xinvnum attrib(link "login?screen=apalc&command=Show&xinvnum=?"), ~
+        xdate,xbalance,xamount
+		header "Invoice No","Inv Date","Invoice Balance","Allocated Amt"
+        totals "","Totals","",sum
+     end list
+
+     form one
+        caption "AP Allocation for "+xvoucher
+        table aralc
+        primarykey xvoucher,xinvnum
+        order xvoucher,xinvnum
+        fixed xvoucher
+        return "login"
+        pstyle 3
+        layout 2
+        objects Return,Clear,Show,Add, Update, Delete,*next, Top, Bottom,~//AllocateByDate,
+                xinvnum attrib(readonly),xdate attrib(readonly),xdatedue,~
+                xbalance,xamount,xmiocode display(hide),xmioname display(hide),zactive,xpornum display(hide),xgrnnum display(hide),~
+				xdiv attrib(local),xfdate attrib(local),xtdate attrib(local)
+
+        
+
+        field xamount
+          caption Paid Amount
+        end field
+		
+        field xfdate
+          caption Allocation From 
+		  display hide
+        end field	
+
+        field xtdate
+          caption Allocation To 
+		  display hide
+        end field			
+
+        field xdiv
+          caption Outlet
+		  display hide
+        end field	
+
+		field xmiocode
+			attrib local
+			caption MIO Name
+			event after
+				set	xmiocode=arhed.xsp("xvoucher='"+xinvnum+"'")
+			end event
+		end field
+		
+		field xmioname
+			attrib local
+			caption MIO Name
+			event after
+				set	xmioname=cappo.xname("xsp='"+xmiocode+"'")
+			end event
+		end field
+		
+		field zactive
+			attrib local
+			display hide
+			caption MIO Status
+			event after
+				set	zactive=cappo.zactive("xsp='"+xmiocode+"'")
+			end event
+		end field
+		
+        field xdum
+           caption <br><FONT SIZE=2 COLOR=red>Unallocated Amount</font>
+          attrib local
+          display constant
+		  event before
+		  set xdum=arhed.xbalprime("xvoucher='"+xvoucher+"'")
+		  end event
+        end field
+
+        field xbalance
+          attrib readonly
+        end field
+
+        field AllocateByDate
+          event before
+			if xvoucher .eq. ""
+				error "Payment is not Selected!"
+			end if
+          end event
+          event after
+            set temp = #spsql(zabsp_AP_AutoCollectionByDate,#id,#user,xvoucher,xfdate,xtdate,xdiv)
+            action Show
+          end event
+        end field
+		
+		field Add
+			event before
+				if xamount == 0.00
+					set xamount=xbalance
+				end if
+			set xpornum=pogrnheader.xpornum("xinvnum='"+xinvnum+"'")
+			set xgrnnum=pogrnheader.xgrnnum("xinvnum='"+xinvnum+"'")
+			double primeamt = 0.00
+			set invnum=aralc.xinvnum("xvoucher='"+xvoucher+"' and xinvnum='"+xinvnum+"'")
+				if invnum .ne. ""
+					error "Already Allocation this Invoice : "+invnum
+				end if
+			end event
+			
+			event after
+				double alcamt = 0.00
+				double vataitamt = 0.00
+				double prntotamt = 0.00
+				double totvataitamt = 0.00
+				double primeamt = 0.00
+				set vataitamt = #sesql("select xvatamt+xaitamt from arhed where zid = '"+#id+"' and xvoucher='"+xvoucher+"'")
+				set statusjv=arhed.xstatusjv("xvoucher='"+xvoucher+"'")
+				set prntotamt = #sql(double,"select sum(xamount) from apprnalc where xvoucher='"+xvoucher+"'")
+				set alcamt = #sesql("select sum(xamount) from aralc where zid = '"+#id+"' and xvoucher='"+xvoucher+"'")
+				set totvataitamt=vataitamt+prntotamt
+				set primeamt = alcamt-totvataitamt
+				
+				
+				
+				set temp = #spsql(sp_validateAfterAllocateAP,#id,#user,xvoucher,xinvnum,xbalance,xamount)
+				if statusjv .eq. "Open"
+					print "<font size=3 align=center>Total Paid Amount is : </font>"+primeamt
+				end if 
+				set temp =#sesql("delete from aralc where zid ='"+#id+"' and xvoucher='"+xvoucher+"' and xinvnum='"+xinvnum+"' and xamount = 0.00 ")
+				action Show
+				set xamount=0
+				set xbalance=0
+				set xvoucher=""
+				set xinvnum=""
+			end event
+		end field		
+
+        
+
+		field update
+			event before
+				if xamount == 0.00
+					set xamount=xbalance
+				end if
+			set xpornum=pogrnheader.xpornum("xinvnum='"+xinvnum+"'")
+			set xgrnnum=pogrnheader.xgrnnum("xinvnum='"+xinvnum+"'")
+			double primeamt = 0.00
+			set invnum=aralc.xinvnum("xvoucher='"+xvoucher+"' and xinvnum='"+xinvnum+"'")
+				//if invnum .ne. ""
+					//error "Already Allocation this Invoice : "+invnum
+				//end if
+			end event
+			
+			event after
+				double alcamt = 0.00
+				double vataitamt = 0.00
+				double prntotamt = 0.00
+				double totvataitamt = 0.00
+				double primeamt = 0.00
+				set vataitamt = #sesql("select xvatamt+xaitamt from arhed where zid = '"+#id+"' and xvoucher='"+xvoucher+"'")
+				set statusjv=arhed.xstatusjv("xvoucher='"+xvoucher+"'")
+				set prntotamt = #sql(double,"select sum(xamount) from apprnalc where xvoucher='"+xvoucher+"'")
+				set alcamt = #sesql("select sum(xamount) from aralc where zid = '"+#id+"' and xvoucher='"+xvoucher+"'")
+				set totvataitamt=vataitamt+prntotamt
+				set primeamt = alcamt-totvataitamt
+				
+				//if primeamt<=0.00
+				//set temp = #sesql("update arhed set zutime=getdate(),zuuserid='"+#user+"',xprime=0.00,xbase=0.00 where zid = '"+#id+"' and xvoucher='"+xvoucher+"'")
+				//end if
+				
+				//if primeamt>0.00
+				//set primeamt=primeamt*1
+				//set temp = #sesql("update arhed set zutime=getdate(),zuuserid='"+#user+"',xprime="+primeamt+",xbase="+primeamt+" where zid = '"+#id+"' and xvoucher='"+xvoucher+"'")
+				//end if
+				
+				set temp = #spsql(sp_validateAfterAllocateAP,#id,#user,xvoucher,xinvnum,xbalance,xamount)
+				if statusjv .eq. "Open"
+					print "<font size=3 align=center>Total Paid Amount is : </font>"+primeamt
+				end if 
+				set temp =#sesql("delete from aralc where zid ='"+#id+"' and xvoucher='"+xvoucher+"' and xinvnum='"+xinvnum+"' and xamount = 0.00 ")
+				action Show
+				set xamount=0
+				set xbalance=0
+			end event
+		end field
+		
+		field delete
+		event before
+			if xamount == 0
+				set xamount=xbalance
+			end if
+			set xpornum=pogrnheader.xpornum("xinvnum='"+xinvnum+"'")
+			set xgrnnum=pogrnheader.xgrnnum("xinvnum='"+xinvnum+"'")
+		end event
+          
+		event after
+			double alcamt = 0.00
+			double primeamt = 0.00
+			double vataitamt = 0.00
+			set invnum = xinvnum
+			set voucher = xvoucher
+			double balance = xbalance
+			double amount = xamount
+			set statusjv=arhed.xstatusjv("xvoucher='"+xvoucher+"'")
+			set vataitamt = #sesql("select xvatamt+xaitamt from arhed where zid = '"+#id+"' and xvoucher='"+xvoucher+"'")
+			//*********** Auto Payment Amount Set up****************// 
+			//*********** End Auto Payment Amount Set up************// 
+			set temp = #spsql(sp_validateAfterAllocateAP,#id,#user,voucher,invnum,balance,amount)
+			action Show
+			set xamount=0
+			set xbalance=0
+		end event
+       end field
+
+
+        embed onsubmit="return submitit(this)"
+
+        field Return
+          embed onclick="clicked(this)"
+        end field
+
+     end form
+
+     jscript myscript
+
+        <script language="javascript" type="text/javascript">
+        var but
+        var result
+
+        function clicked(b){
+          but = b.value
+        }
+        function submitit(form){
+          result = true
+          if (but == "Return"){
+            form.screen.value = "appayment"
+            form.searchbutton.value = "Find xvoucher=?"
+          }
+        }
+
+        function pickDetail(link,primebal,date){
+          if (navigator.appName.indexOf("Netscape") >= 0){
+            document.one.xinvnum.value=link.text
+            document.one.xbalance.value=primebal.text
+            document.one.xdate.value=date.text
+          }else{
+            document.one.xinvnum.value=link.innerText
+            document.one.xbalance.value=primebal.innerText
+            document.one.xdate.value=date.innerText
+          }
+          return false
+        }
+        </script>
+     end jscript
+
+end screen
+
+
+
+

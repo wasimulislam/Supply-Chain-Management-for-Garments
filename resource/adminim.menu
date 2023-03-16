@@ -1,0 +1,17 @@
+//adminarim.menu
+//-------------------------------------------------------------------
+option                           |action
+//-------------------------------------------------------------------
+Receive Entry                    |#classPath+"/login?screen=imtrnre"
+Finished Goods Receive    	|#classPath+"/login?screen=imtrnfgre"
+Inventory Transactions                    	|#classPath+"/login?screen=imtrnadmin"
+IM Rate Update                  |#classPath+"/login?screen=mmm" 
+//Transfer To JV (Update)                    |#classPath+"/login?screen=pogrnheaderacadminjv" 
+//Entry Review                      |#classPath+"/login?screen=*aspcrystal adminreviewpass(xstart=Issue No,xpassword=Password)"
+//User and Date wise Entry Review   |#classPath+"/login?screen=*aspcrystal admindatewisereview(zemail=User,xdate=Fromdate=#date,xdate=To Date=#date,xpassword=Password)"
+//The Business                     |#classPath+"/login?screen=zbusiness"
+//Modules                          |#classPath+"/login?screen=*modules"
+//Models                           |#classPath+"/login?screen=*models"
+ 
+
+//-------------------------------------------------------------------

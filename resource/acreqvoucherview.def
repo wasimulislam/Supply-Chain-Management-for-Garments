@@ -1,0 +1,12 @@
+product ZAB ERP
+
+table acreqvoucherview
+  caption "Voucher Header"
+   columns zid,xacreqnum,xvoucher1,xrow
+  primary key zid,xacreqnum,xvoucher1
+  foreign key
+        zid references zbusiness.zid
+  end foreign key
+ sql create view acreqvoucherview (zid,xacreqnum,xvoucher1,xrow,xacc,xsub,xdebit,xcredit) ~
+                  as select a.zid,a.xacreqnum,a.xvoucher1 as xvoucher1,b.xrow,b.xacc,b.xsub,b.xdebit,b.xcredit from acreqheader a join acdetail b on a.zid=b.zid and a.xvoucher1=b.xvoucher
+end table	

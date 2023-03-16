@@ -1,0 +1,504 @@
+screen acreqheadersettle
+		sidebar list one,list two,list detail,list accdet,list accdet2
+		sections form one, jscript myscript
+
+	list one
+		caption "Unsettled IOU List"
+		table acreqheader
+		order xacreqnum desc
+		select "left(xacreqnum,3)='IOU' and xstatus='Approved' and xstatusreq='Received'"	
+        dtlengthmenu [10,25,50,100, -1], [10,25,50,100, "All"]
+		rows 5
+        objects  xacreqnum attrib(link "login?screen=acreqheadersettle&command=Show&xacreqnum=?"),xdate,xstatusloan,xstatusreq,~
+		xidsupdesc equals((select xname from pdmst where zid=acreqheader.zid and xposition=acreqheader.xidsup)),~
+				 xidsupdesc2 equals((select xname from pdmst where zid=acreqheader.zid and xposition=acreqheader.xsuperior2))
+		headers "Requisition No","Date","Settlement Approval Status","Payment Status","Approver","OR >>>>>> Approver"
+	end list
+	list two
+		caption "Settled IOU List"
+		table acreqheader
+		order xacreqnum desc
+		select "left(xacreqnum,3)='IOU' and xstatus='Approved' and xstatusreq='Closed'"	
+        dtlengthmenu [10,25,50,100, -1], [10,25,50,100, "All"]
+		rows 5
+        objects  xacreqnum attrib(link "login?screen=acreqheadersettle&command=Show&xacreqnum=?"),xdate,xstatus,xstatusreq,~
+		xidsupdesc equals((select xname from pdmst where zid=acreqheader.zid and xposition=acreqheader.xidsup)),~
+				 xidsupdesc2 equals((select xname from pdmst where zid=acreqheader.zid and xposition=acreqheader.xsuperior2))
+		headers "Requisition No","Date","Approve Status","Payment Status","Approver","OR >>>>>> Approver"
+	end list
+	
+		list detail
+		caption "Fund Requisition Details for IOU"
+		table acreqdetail
+		order xrow
+		fixed xacreqnum
+		dtlengthmenu [10,25,50,100, -1], [10,25,50,100, "All"]
+		rows 5
+		objects  xrow attrib(link "login?screen=acreqdetailpay&command=Show&xrow=?"), ~
+		xitem,~
+		item equals((select xdesc from caitem where zid=acreqdetail.zid and caitem.xitem=acreqdetail.xitem)),~
+		xcost,xamount,xloanamt
+		headers "Row No","Item","Item Description","Requested Amount"," Paid Amount"," Settlement Amount"
+		
+		totals "","","Total","",sum,sum,sum
+		end list
+		list accdet
+			caption "Payment Voucher Detail List"
+			table acdetail
+			order xvoucher,xrow
+			fixed xvoucher
+			dtlengthmenu [10,25,50,100, -1], [10,25,50,100, "All"]
+			rows 10
+			objects  xvoucher attrib(link "login?screen=acheader&command=Show&xvoucher=?"), ~
+			xrow attrib(link "login?screen=acdetail&command=Show&xvoucher=?&xrow=?"), ~
+			xacc,desc equals((select xdesc from acmst where acmst.zid=acdetail.zid and acmst.xacc=acdetail.xacc)),~
+			xsub,subdesc equals((select xorg from acsubview where zid=acdetail.zid and xsub=acdetail.xsub and xacc=acdetail.xacc)),xdebit,xcredit
+			totals "","","","","Total","",sum,sum
+			headers "Voucher No","Line No","Acc Code","Description","Sub Code","Description","Debit","Credit"
+		end list
+		list accdet2
+			caption "Settlement Voucher Detail List"
+			table acreqvoucherview
+			order xvoucher1,xrow
+			fixed xvoucher1
+			dtlengthmenu [10,25,50,100, -1], [10,25,50,100, "All"]
+			rows 10
+			objects  xvoucher1 attrib(link "login?screen=acheadercp&command=Show&xvoucher=?"), ~
+			xrow attrib(link "login?screen=acdetailcp&command=Show&xvoucher1=?&xrow=?"), ~
+			xacc,desc equals((select xdesc from acmst where acmst.zid=acreqvoucherview.zid and acmst.xacc=acreqvoucherview.xacc)),~
+			xsub,subdesc equals((select xorg from acsubview where zid=acreqvoucherview.zid and xsub=acreqvoucherview.xsub and xacc=acreqvoucherview.xacc)),xdebit,xcredit
+			totals "","","","","Total","",sum,sum
+			headers "Voucher No","Line No","Acc Code","Description","Sub Code","Description","Debit","Credit"
+		end list
+		
+
+		form one
+		caption "Final Settlement For IOU"
+		table acreqheader
+		primary key xacreqnum
+		order xacreqnum
+		//select "left(xacreqnum,3)='LGL'"
+		return "login"
+		layout 3
+		pstyle 3
+		objects ~
+			Add,Update, Delete,Show,Clear,Top, Previous, Next, Bottom,Detail,Confirm,Closed,"<p>" ,~ //Terms and Conditions,Add_Account,
+			xacreqnum,xdate display(const),xdateret display(const),xdaterec,~
+			xstatus  display(const),xstatusreq display(const),xstatusloan display(const),xaccdr display(hide),~
+			accdesc display(const),~
+			xvoucher display(const),~
+			xvoucher1 display(const),xacccr display(hide),~
+			acccrdesc display(hide),~
+			acccr1desc display(hide),xnote display(const),xstaff display(const),name,,~
+			signatorysec display(const),,~
+			xpkey display(hide) attrib(local),~
+			xpreparer display(hide),preparer display(const),~	
+			xidsup display(hide),~			
+			xsignatory1 display(hide),signatory1  display(const),~
+			xsignatory2 display(hide),signatory2 display(const),~
+			xsignatory3 display(hide),signatory3 display(const),~
+			xsignatory4 display(hide),signatory4  display(const),~
+			xsignatory5 display(hide),signatory5 display(const),~
+			xsignreject display(hide),signreject display(const),~
+			xnote1 display(const)
+
+		field xvoucher
+		Caption Payment Voucher 
+		end Field
+		
+		field name
+          caption Requester Name
+          attrib local
+          display const
+          event after
+            set name=pdmst.xname("xstaff='"+xstaff+"'")
+          end event
+        end field
+		
+		field xstaff
+		Caption Requester
+		end Field
+		
+		field xstatusloan
+		Caption Settlement Approval Status 
+		end Field
+		
+		field xvoucher1
+		Caption Settlement Voucher 
+		end Field
+		
+		field xdaterec
+		Caption Settlement Date
+		end Field
+		
+		
+		field xdesc
+		Caption Fund Collection No  
+		end Field
+		
+		field xstatusreq
+		display const
+		Caption Requesition Status
+		end Field
+		
+		field xdateret
+		Caption Paid Date
+		end Field
+		
+		field xnote
+		Caption Preparer's Note
+		end Field
+		
+		field xref
+		 
+		end Field
+		
+	
+		
+		
+		field xacccr1
+		caption Credit Account Name(If Needed)
+		
+		end field
+		
+		field accdesc
+          caption Account Name
+          attrib local
+          display hide
+          event after
+            set accdesc=acmst.xdesc("xacc='"+xacc+"'")
+          end event
+        end field
+		
+		field acccrdesc
+          caption Account Name
+          attrib local
+          display hide
+          event after
+            set acccrdesc=acmst.xdesc("xacc='"+xacccr+"'")
+          end event
+        end field
+		
+		field acccr1desc
+          caption Account Name
+          attrib local
+          display hide
+          event after
+            set acccr1desc=acmst.xdesc("xacc='"+xacccr1+"'")
+          end event
+        end field
+		
+		
+		field xnote1
+		Caption Reject Note 
+		end Field
+
+		field xacreqnum
+		Caption Requisition No
+		width 12
+		pick list xacreqnum
+		event after
+		if xacreqnum .ne. ""
+		set #field(add.attrib) = "disabled"
+		end if
+		set globals(xacreqnum)=xacreqnum
+		 class careports(getReport{iouprint;2;in,st;zid,reqnum;xacreqnum;View Fund Requisition})
+		 if acreqheader.xstatusloan("xacreqnum='"+xacreqnum+"'") .ne. "Open" .and. acreqheader.xstatusloan("xacreqnum='"+xacreqnum+"'") .ne. "Rejected"
+		set #field(Confirm.attrib) = "disabled" 
+		set #field(Add.attrib) = "disabled" 
+		end if
+		if acreqheader.xstatusloan("xacreqnum='"+xacreqnum+"'") .eq. "Applied" .or. acreqheader.xstatusloan("xacreqnum='"+xacreqnum+"'") .eq. "Recommended" .or. acreqheader.xstatusloan("xacreqnum='"+xacreqnum+"'") .eq. "Approved"
+		set #field(Update.attrib) = "disabled"
+		set #field(Add.attrib) = "disabled" 
+		end if
+		if acreqheader.xstatusloan("xacreqnum='"+xacreqnum+"'") .ne. "Approved"
+		set #field(Closed.attrib) = "disabled"
+		end if
+		if acreqheader.xstatusreq("xacreqnum='"+xacreqnum+"'") .eq. "Closed"
+		set #field(Closed.attrib) = "disabled"
+		end if
+		end event
+		end field
+
+
+
+		
+		field paymentsec
+		attrib local
+		caption <span class=sheader style="	BACKGROUND:#0480ba;	PADDING-BOTTOM: 5px;PADDING-LEFT: 10px; PADDING-RIGHT: 50px; 	PADDING-TOP: 2px;">Payments</span>
+		display const
+		//column 2
+		end field
+		
+		field signatorysec
+		attrib local
+		caption <span class=sheader style="	BACKGROUND:#0480ba;	PADDING-BOTTOM: 5px;PADDING-LEFT: 10px; PADDING-RIGHT: 50px; 	PADDING-TOP: 2px;">Signatories</span>
+		display const
+		//column 2
+		end field
+
+		field preparer
+		caption Preparer
+		attrib local
+		event after
+		if xpreparer .ne. ""
+		set preparer=pdmst.xname("xstaff='"+xpreparer+"'")+"<br><font SIZE=2>"+pdmst.xdesignation("xstaff='"+xpreparer+"'")+", "+pdmst.xdeptname("xstaff='"+xpreparer+"'")+"</font>"
+		end if
+		end event
+		end field
+
+		field signatory1
+		caption pick,"select xsignatory1 from pdsignatoryrpt where xtypetrn='Legal Fund Approval'"
+		attrib local
+		event after
+		if xsignatory1 .ne. ""
+		set signatory1=pdmst.xname("xstaff='"+xsignatory1+"'")+"<br><font SIZE=2>"+pdmst.xdesignation("xstaff='"+xsignatory1+"'")+", "+pdmst.xdeptname("xstaff='"+xsignatory1+"'")+"</font>"
+		end if
+		end event
+		end field
+
+		field signatory2
+		caption pick,"select xsignatory2 from pdsignatoryrpt where xtypetrn='Legal Fund Approval'"
+		attrib local
+		event after
+		if xsignatory2 .ne. ""
+		set signatory2=pdmst.xname("xstaff='"+xsignatory2+"'")+"<br><font SIZE=2>"+pdmst.xdesignation("xstaff='"+xsignatory2+"'")+", "+pdmst.xdeptname("xstaff='"+xsignatory2+"'")+"</font>"
+		end if
+		end event
+		end field
+
+
+		field signatory3
+		caption pick,"select xsignatory3 from pdsignatoryrpt where xtypetrn='Legal Fund Approval'"
+		attrib local
+		event after
+		if xsignatory3 .ne. ""
+		set signatory3=pdmst.xname("xstaff='"+xsignatory3+"'")+"<br><font SIZE=2>"+pdmst.xdesignation("xstaff='"+xsignatory3+"'")+", "+pdmst.xdeptname("xstaff='"+xsignatory3+"'")+"</font>"
+		end if
+		end event
+		end field
+		
+		field signatory4
+			caption pick,"select xsignatory4 from pdsignatoryrpt where xtypetrn='Legal Fund Approval'"
+			attrib local
+			event after
+			if xsignatory4 .ne. ""
+			set signatory3=pdmst.xname("xstaff='"+xsignatory4+"'")+"<br><font SIZE=2>"+pdmst.xdesignation("xstaff='"+xsignatory4+"'")+", "+pdmst.xdeptname("xstaff='"+xsignatory4+"'")+"</font>"
+			end if
+			end event
+			end field
+			
+			field signatory5
+			caption pick,"select xsignatory5 from pdsignatoryrpt where xtypetrn='Legal Fund Approval'"
+			attrib local
+			event after
+			if xsignatory5 .ne. ""
+			set signatory5=pdmst.xname("xstaff='"+xsignatory5+"'")+"<br><font SIZE=2>"+pdmst.xdesignation("xstaff='"+xsignatory5+"'")+", "+pdmst.xdeptname("xstaff='"+xsignatory3+"'")+"</font>"
+			end if
+			end event
+			end field
+
+		field signreject
+		caption Reject Signatory
+		attrib local
+		event after
+		if xsignreject .ne. ""
+		set signreject=pdmst.xname("xstaff='"+xsignreject+"'")+"<br><font SIZE=2>"+pdmst.xdesignation("xstaff='"+xsignreject+"'")+", "+pdmst.xdeptname("xstaff='"+xsignreject+"'")+"</font>"
+		end if
+		end event
+		end field
+
+		field xstatus
+		caption Approval Status  
+		event after
+		if acreqheader.xstatus("xacreqnum='"+xacreqnum+"'") .ne. "Open" .and. acreqheader.xstatus("xacreqnum='"+xacreqnum+"'") .ne. "Rejected"
+		set #field(delete.attrib) = "disabled"
+		//set #field(Update.attrib) = "disabled"
+		end event
+		end if
+		end field
+		
+		field show
+			event before
+			end event
+			event after
+			set xpkey=xacreqnum
+			end event	  
+		end field	
+
+
+		
+
+
+		field Add
+		event before 
+		set xpreparer=pdmst.xstaff("xposition='"+#position+"'") 
+		set year1=#sub(xdate,0,4)
+		set name=xcodes.xfield("xcode='"+xcompany+"' and xtype='Company'")
+		set company=#sql("select xcode from xcodes where xcode='"+xcompany+"' and xtype='Company'")		
+		set xstatus="Open"
+		//if xcompany .eq. ""
+		//error "Select Company" 
+		//else if company .eq. ""
+		//error "Incorrect Company"
+		 if xdate .gt. xdateret
+		error "Adjustment date cannot be before current date"
+		else 
+		set xacreqnum = #trn("GL Voucher","IOU-",12) 
+		//set xvoucher = #trn("GL Voucher",xtrn,12)
+		set xpkey=xacreqnum
+		int num = 0
+		set num=#sesql("select convert(int,max(xdesc)) from acreqheader where zid='"+#id+"' and xcompany='"+xcompany+"' and year(xdate)='"+year1+"'")
+		set num=num+1 
+		set xdesc=#padl(num,3,"0") 
+		set xref= name+"/"+xcompany+"/"+xdesc+"/"+year1 
+		end if
+		end event
+		end field
+
+		field Update
+		event before
+		set year1=#sub(xdate,0,4)
+		if xacreqnum .eq. ''
+		error "Please show First!"
+		else if xpkey .ne. xacreqnum
+		error "Please show First!" 
+		else if xdate .gt. xdaterec
+		error "Settlement date cannot be before current date"
+		
+		end if
+		end event
+		end if
+		end event
+		event after 
+		action show
+		end event
+		end field
+
+		
+		
+		field Confirm
+			event before
+				double settleamt=#sql("select sum(xloanamt) from acreqdetail where xacreqnum='"+xacreqnum+"'")
+				double paidamt =    #sql("select xprime from acdetail where xvoucher='"+xvoucher+"' and xacc='"+xacccr+"'")
+				if acreqheader.xstatusloan("xacreqnum='"+xacreqnum+"'") .ne. "Open" .and. acreqheader.xstatusloan("xacreqnum='"+xacreqnum+"'") .ne. "Rejected" 
+					error "Request Already Sent."
+					else if xdaterec .eq. "2999-01-01"
+					error "Cannot Proceed -- Please Update Settlement Date"
+				else if settleamt<1
+					error "Please Add Settle Amount"
+				//else if settleamt .ne. paidamt .and. xacccr1 .eq. ""
+					//error "Cannot Proceed -- Please Set Factory Petty Cash Account"
+				end if
+			end event
+			event after
+				set temp =#spsql(zabsp_Confirmed_Request,#id,#user,#position,"01",xacreqnum,"IOU Settlement")
+				action show
+			end event
+		end field
+		
+		field Closed
+			event before
+			
+				double settleamt =  #sql("select sum(xloanamt) from acreqdetail where xacreqnum='"+xacreqnum+"'")
+				double paidamt =    #sql("select xprime from acdetail where xvoucher='"+xvoucher+"' and xacc='"+xacccr+"'")
+				if xacreqnum .eq. ""
+					error "Cannot Proceed -- Please Choose Store "
+				else if xdaterec .eq. "2999-01-01"
+					error "Cannot Proceed -- Please Update Settlement Date"
+				else if settleamt <= 0	
+					error "Cannot Proceed -- Settlement Amount is "+settleamt
+				else if xstatusloan .eq. "Closed"
+					error "Cannot Proceed -- IOU Already Closed"
+				//else if settleamt .ne. paidamt .and. xacccr1 .eq. ""
+					//error "Cannot Proceed -- Please Office Factory Cash Account"
+				else if xstatusloan .ne. "Approved"
+					error "Cannot Proceed -- Please IOU Settlement Approve First"
+				else 	
+					set temp = #spsql(zabsp_IOU_Settlemnt,#id,#user,#position,xacreqnum)
+					set voucher = acreqheader.xvoucher1("xacreqnum='"+xacreqnum+"'")
+					print "<font size=+1 color=red>Voucher No "+voucher+" Created</font>"
+				end if
+			end event
+          event after
+			action show		  
+          end event
+        end field
+		
+		field Delete
+		event before
+		if xacreqnum .eq. ""
+		error "Please show First!"
+		else if acreqheader.xstatus("xacreqnum='"+xacreqnum+"'") .ne. "Open" .and. acreqheader.xstatus("xacreqnum='"+xacreqnum+"'") .ne. "Rejected"
+		error "Cannot Delete Record"
+		end if
+		end event
+		event after
+		action show
+		end event
+		end field		
+
+
+
+
+
+
+		embed onsubmit="return submitit(this)"
+		//embed onsubmit="submitit(this)"
+
+
+		field Send
+		embed onclick="clicked(this)"
+		end field
+		
+		field Add_Account
+		embed onclick="clicked(this)"
+		end field
+		
+
+        field Detail
+          embed onclick="clicked(this)"
+        end field
+		
+		field Terms
+          embed onclick="clicked(this)"
+        end field
+
+
+
+
+		end form
+
+		jscript myscript
+
+		<script language="javascript" type="text/javascript">
+		var detail
+
+		function clicked(b){
+		detail=b.value
+		}
+		function submitit(form){
+		if (detail=="Terms and Conditions"){
+            form.screen.value = "pdrfpterms"
+            form.searchbutton.value = "Top"
+          }
+		 if (detail=="Detail"){
+            form.screen.value = "acreqdetailsettle"
+            form.searchbutton.value = "Top"
+          }
+		  
+		  
+		if (detail=="Send for Approval"){
+		if(confirm('Are You Confirm ?')){
+		form.searchbutton.value = "Send for Approval"
+		}else{
+		form.searchbutton.value = "Show"
+		}
+		}
+		}
+
+		</script>
+		end jscript
+
+
+end screen

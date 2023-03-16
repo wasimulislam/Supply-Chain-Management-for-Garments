@@ -1,0 +1,85 @@
+screen aptrn
+     caption "AP Transactions Detail"
+     sections form one,list one, jscript myscript
+
+
+     list one
+        caption "Detail List"
+        table aptrn
+        order xvoucher,xrow
+        fixed xvoucher
+        rows 20
+        objects  xrow attrib(link "login?screen=aptrn&command=Show&xvoucher=?&xrow=?"), ~
+                xacc,xdiv,xsec,xproj,xprime,xbase
+
+        totals "Totals","","","","",sum,sum
+     end list
+
+     form one
+        caption "Details of "+xvoucher
+        table aptrn
+        order xvoucher,xrow
+        fixed xvoucher
+        return "login"
+        layout 2
+        objects Return,Clear,Show,Add, Update, Delete, Top, Previous, Next, Bottom,~
+               xrow attrib(row 0 10;search),xacc,xdiv,xsec,xproj,~
+               xprime,xbase,xlong width(50),xsign display(hidden)
+
+
+        field Add
+          event before
+            class gltrn(apValidateBeforeDetail{xvoucher})
+          end event
+          event after
+            class gltrn(apValidateAfterDetail{xvoucher})
+          end event
+        end field
+
+        field Update
+          event before
+            class gltrn(apValidateBeforeDetail{xvoucher})
+          end event
+          event after
+            class gltrn(apValidateAfterDetail{xvoucher})
+          end event
+        end field
+
+        field delete
+          event after
+            class gltrn(apValidateAfterDetail{xvoucher})
+          end event
+        end field
+
+        embed onsubmit="return submitit(this)"
+        field Return
+          embed onclick="clicked(this)"
+        end field
+
+     end form
+
+     jscript myscript
+
+        <script language="javascript" type="text/javascript">
+        var but
+        var result
+
+        function clicked(b){
+          but = b.value
+        }
+        function submitit(form){
+          result = true
+          if (but == "Return"){
+            form.screen.value = "aphed"
+            form.searchbutton.value = "Find xvoucher=?"
+          }
+        }
+
+        </script>
+     end jscript
+
+end screen
+
+
+
+

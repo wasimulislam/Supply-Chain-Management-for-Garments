@@ -1,0 +1,20 @@
+//admincom.menu
+//-------------------------------------------------------------------
+option                           |action
+//-------------------------------------------------------------------
+PI Update -Admin                  |#classPath+"/login?screen=opordheaderup" 
+CI Update -Admin               |#classPath+"/login?screen=opinvheaderadmin"
+SC Update -Admin                  |#classPath+"/login?screen=opordscinfoadmin"
+
+
+//Transfer To AP (Update)                    |#classPath+"/login?screen=pogrnheaderacadmin" 
+//Supplier Invoice                   |#classPath+"/login?screen=apinvoiceadmin" 
+//Transfer To JV (Update)                    |#classPath+"/login?screen=pogrnheaderacadminjv" 
+//Entry Review                      |#classPath+"/login?screen=*aspcrystal adminreviewpass(xstart=Issue No,xpassword=Password)"
+//User and Date wise Entry Review   |#classPath+"/login?screen=*aspcrystal admindatewisereview(zemail=User,xdate=Fromdate=#date,xdate=To Date=#date,xpassword=Password)"
+//The Business                     |#classPath+"/login?screen=zbusiness"
+//Modules                          |#classPath+"/login?screen=*modules"
+//Models                           |#classPath+"/login?screen=*models"
+ 
+
+//-------------------------------------------------------------------

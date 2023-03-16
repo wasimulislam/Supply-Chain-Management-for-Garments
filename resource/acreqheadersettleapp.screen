@@ -1,0 +1,327 @@
+screen acreqheadersettleapp
+		sidebar list one,list detail,list accdet
+		sections form one,list terms, jscript myscript
+
+
+		list one
+		caption "Pending IOU For Settlement Approval"
+		table acreqheader
+		order xacreqnum desc
+		select "(xsuperior4='"+#position+"' or xsuperior5='"+#position+"' or xsuperior6='"+#position+"') ~
+		and '"+#position+"'<>'' and left(xacreqnum,3)='IOU'  and xstatusloan not in ('Approved')"
+        dtlengthmenu [10,25,50,100, -1], [10,25,50,100, "All"]
+		rows 5
+        objects  xacreqnum attrib(link "login?screen=acreqheadersettleapp&command=Show&xacreqnum=?"),xdate,xstatusloan,~
+		xidsupdesc equals((select xname from pdmst where zid=acreqheader.zid and xposition=acreqheader.xidsup)),~
+				 xidsupdesc2 equals((select xname from pdmst where zid=acreqheader.zid and xposition=acreqheader.xsuperior2))
+		headers "Requisition No","Date","IOU Sattlement Status","Approver","OR >>>>>> Approver"
+		end list
+		
+		list detail
+		caption "Fund Requisition Detail for IOU"
+		table acreqdetail
+		order xrow
+		fixed xacreqnum
+		dtlengthmenu [10,25,50,100, -1], [10,25,50,100, "All"]
+		rows 5
+		objects  xrow attrib(link "login?screen=acreqdetailsettleapp&command=Show&xrow=?"), ~
+		xitem,~
+		desc equals((select xdesc from caitem where zid=acreqdetail.zid and xitem=acreqdetail.xitem)),~
+		xcost,xamount,xloanamt
+		headers "Row No","Item","Description","Request Amount","Paid Amount","Settlement Amount"
+		
+		//totals "","","Total","",sum,sum,sum
+		end list
+		list accdet
+			caption "Payment Voucher Detail List"
+			table acdetail
+			order xvoucher,xrow
+			fixed xvoucher
+			dtlengthmenu [10,25,50,100, -1], [10,25,50,100, "All"]
+			rows 10
+			objects  xvoucher attrib(link "login?screen=acheader&command=Show&xvoucher=?"), ~
+			xrow attrib(link "login?screen=acdetail&command=Show&xvoucher=?&xrow=?"), ~
+			xacc,desc equals((select xdesc from acmst where acmst.zid=acdetail.zid and acmst.xacc=acdetail.xacc)),~
+			xsub,subdesc equals((select xorg from acsubview where zid=acdetail.zid and xsub=acdetail.xsub and xacc=acdetail.xacc)),xdebit,xcredit
+			totals "","","","","Total","",sum,sum
+			headers "Voucher No","Line No","Acc Code","Description","Sub Code","Description","Debit","Credit"
+		end list
+		
+
+		form one
+		caption "IOU Settlement Approval"
+		table acreqheader
+		primary key xacreqnum
+		order xacreqnum
+		select "left(xacreqnum,3)='IOU'"
+		return "login"
+		layout 3
+		pstyle 3
+		objects ~
+			Add,Update, Delete,Show,Clear,Top, Previous, Next, Bottom,Detail,Approve,Reject,"<p>" ,~ 
+			xacreqnum,xdate display(const),xdateret display(const),xdaterec display(const),xdesc display(hide),xref display(hide),~
+			xstatus  display(const),xstatusreq display(const),xstatusloan display(const),xnote display(const),xstaff display(const),name,,~
+			signatorysec display(const),,~
+			xpkey display(hide) attrib(local),~
+			xpreparer display(hide),preparer display(const),~	
+			xidsup display(hide),~			
+			xsignatory1 display(hide),signatory1  display(const),~
+			xsignatory2 display(hide),signatory2 display(const),~
+			//xsignatory3 display(hide),signatory3 display(const),~
+			xsignatory4 display(hide),signatory4  display(const),~
+			xsignatory5 display(hide),signatory5 display(const),~
+			xsignreject display(hide),signreject display(const),~
+			xnote1 
+
+	
+		
+		field xstatus
+		Caption Approval Status
+		end Field
+		
+		field xdateret
+		Caption Paid Date
+		end Field
+
+		field xdaterec
+		Caption Selltement Date
+		end Field
+
+		field xnote
+		Caption Preparer's Note
+		end Field
+		field xdesc
+		Caption Fund Collection No  
+		end Field
+
+		field name
+		caption Requester Name
+		attrib local
+		display const
+		event after
+		set name=pdmst.xname("xstaff='"+xstaff+"'")
+		end event
+		end field
+
+		field xstaff
+		Caption Requester
+		end Field
+		
+
+	
+		
+		
+		field xnote1
+		Caption Reject Note 
+		end Field
+
+		field xacreqnum
+		Caption Requisition No
+		width 12
+		pick list xacreqnum
+		event after
+		set globals(xacreqnum)=xacreqnum
+		class careports(getReport{iouprint;2;in,st;zid,reqnum;xacreqnum;View Fund Requisition})
+
+		set #field(Add.attrib) = "disabled"
+		set #field(Delete.attrib) = "disabled" 
+
+
+		if acreqheader.xsuperior4("xacreqnum='"+xacreqnum+"'") .ne. #position .and. acreqheader.xsuperior5("xacreqnum='"+xacreqnum+"'") .ne. #position .and. acreqheader.xsuperior6("xacreqnum='"+xacreqnum+"'") .ne. #position
+		set #field(Delete.attrib) = "disabled"
+		set #field(Update.attrib) = "disabled"
+		set #field(Approve.attrib) = "disabled"
+		set #field(Reject.attrib) = "disabled"
+		end if
+		end event
+		end field
+
+
+
+
+		field signatorysec
+		attrib local
+		caption <span class=sheader style="	BACKGROUND:#0480ba;	PADDING-BOTTOM: 5px;PADDING-LEFT: 10px; PADDING-RIGHT: 50px; 	PADDING-TOP: 2px;">Signatories</span>
+		display const
+		//column 2
+		end field
+
+		field preparer
+		caption Preparer
+		attrib local
+		event after
+		if xpreparer .ne. ""
+		set preparer=pdmst.xname("xstaff='"+xpreparer+"'")+"<br><font SIZE=2>"+pdmst.xdesignation("xstaff='"+xpreparer+"'")+", "+pdmst.xdeptname("xstaff='"+xpreparer+"'")+"</font>"
+		end if
+		end event
+		end field
+
+		field signatory1
+		caption pick,"select xsignatory1 from pdsignatoryrpt where xtypetrn='IOU Approval'"
+		attrib local
+		event after
+		if xsignatory1 .ne. ""
+		set signatory1=pdmst.xname("xstaff='"+xsignatory1+"'")+"<br><font SIZE=2>"+pdmst.xdesignation("xstaff='"+xsignatory1+"'")+", "+pdmst.xdeptname("xstaff='"+xsignatory1+"'")+"</font>"
+		end if
+		end event
+		end field
+
+		field signatory2
+		caption pick,"select xsignatory2 from pdsignatoryrpt where xtypetrn='IOU Approval'"
+		attrib local
+		event after
+		if xsignatory2 .ne. ""
+		set signatory2=pdmst.xname("xstaff='"+xsignatory2+"'")+"<br><font SIZE=2>"+pdmst.xdesignation("xstaff='"+xsignatory2+"'")+", "+pdmst.xdeptname("xstaff='"+xsignatory2+"'")+"</font>"
+		end if
+		end event
+		end field
+
+
+		field signatory3
+		caption pick,"select xsignatory3 from pdsignatoryrpt where xtypetrn='Legal Fund Approval'"
+		attrib local
+		event after
+		if xsignatory3 .ne. ""
+		set signatory3=pdmst.xname("xstaff='"+xsignatory3+"'")+"<br><font SIZE=2>"+pdmst.xdesignation("xstaff='"+xsignatory3+"'")+", "+pdmst.xdeptname("xstaff='"+xsignatory3+"'")+"</font>"
+		end if
+		end event
+		end field
+		
+		field signatory4
+			caption pick,"select xsignatory4 from pdsignatoryrpt where xtypetrn='Legal Fund Approval'"
+			attrib local
+			event after
+			if xsignatory4 .ne. ""
+			set signatory4=pdmst.xname("xstaff='"+xsignatory4+"'")+"<br><font SIZE=2>"+pdmst.xdesignation("xstaff='"+xsignatory4+"'")+", "+pdmst.xdeptname("xstaff='"+xsignatory4+"'")+"</font>"
+			end if
+			end event
+			end field
+			
+			field signatory5
+			caption pick,"select xsignatory5 from pdsignatoryrpt where xtypetrn='Legal Fund Approval'"
+			attrib local
+			event after
+			if xsignatory5 .ne. ""
+			set signatory5=pdmst.xname("xstaff='"+xsignatory5+"'")+"<br><font SIZE=2>"+pdmst.xdesignation("xstaff='"+xsignatory5+"'")+", "+pdmst.xdeptname("xstaff='"+xsignatory5+"'")+"</font>"
+			end if
+			end event
+			end field
+
+		field signreject
+		caption Reject Signatory
+		attrib local
+		event after
+		if xsignreject .ne. ""
+		set signreject=pdmst.xname("xstaff='"+xsignreject+"'")+"<br><font SIZE=2>"+pdmst.xdesignation("xstaff='"+xsignreject+"'")+"<br>"+pdmst.xdeptname("xstaff='"+xsignreject+"'")+"</font>"
+		end if
+		end event
+		end field
+
+		field xstatusloan
+		Caption Settlement Approval Status 
+		event after
+		if acreqheader.xstatusloan("xacreqnum='"+xacreqnum+"'") .ne. "Applied" .and. acreqheader.xstatusloan("xacreqnum='"+xacreqnum+"'") .ne. "Rejected"
+		set #field(delete.attrib) = "disabled"
+		set #field(Update.attrib) = "disabled"
+		end event
+		end if
+		end field
+
+
+		
+
+		
+
+			
+		
+		field Reject
+			event before
+			if xnote1 .ne. ""
+			set temp=#sql("update acreqheader set xnote1='"+xnote1+"' where xacreqnum='"+xacreqnum+"'")
+			end if 	
+			set status=acreqheader.xstatusloan("xacreqnum='"+xacreqnum+"'")
+			if status .eq. "" .or. status .eq. "Approved"
+			error "IOU can not be rejected"
+			else if acreqheader.xnote1("xacreqnum='"+xacreqnum+"'") .eq. ""
+			error "Please Write Reject Note."
+			end if
+			end event
+			event after
+			set temp =  #spsql(zabsp_Reject_Request,#id,#user,#position,0,xacreqnum,"IOU_Settlement_Request")
+			set #field(xnote1.display) = "const"
+			action show
+			end event
+			end field
+
+			field Approve
+			event before
+			if acreqheader.xacreqnum("xacreqnum='"+xacreqnum+"'") .eq. "Approved"
+				error "Cannot Proceed-- Already Approved."
+			else if acreqheader.xsuperior4("xacreqnum='"+xacreqnum+"'") .ne. #position .and. acreqheader.xsuperior5("xacreqnum='"+xacreqnum+"'") .ne. #position .and. acreqheader.xsuperior6("xacreqnum='"+xacreqnum+"'") .ne. #position
+			error "Superior doesn't match."
+			else if #position .eq. ""
+			error "Superior doesn't match."
+			end if
+			end event
+			event after
+			set temp = #spsql(zabsp_apvprcs,#id,#user,#position,xacreqnum,0,xstatusloan,"IOU Settlement Approval")
+			action show
+			end event
+			end field  
+
+			embed onsubmit="return submitit(this)"
+			
+			field Approve
+			embed onclick="clicked(this)"
+			end field  
+
+			field Reject
+			embed onclick="clicked(this)"
+			end field
+			
+
+			field Detail
+			  embed onclick="clicked(this)"
+			end field
+			
+			field Terms
+			  embed onclick="clicked(this)"
+			end field
+
+
+
+
+		end form
+
+		jscript myscript
+
+		<script language="javascript" type="text/javascript">
+		var detail
+
+		function clicked(b){
+		detail=b.value
+		}
+		function submitit(form){
+		if (detail=="Terms and Conditions"){
+            form.screen.value = "pdrfpapproveterms"
+            form.searchbutton.value = "Top"
+          }
+		 if (detail=="Detail"){
+            form.screen.value = "acreqdetailsettleapp"
+            form.searchbutton.value = "Top"
+          }
+		  
+		if (detail=="Approve"){
+		if(confirm('Are You Confirm ?')){
+		form.searchbutton.value = "Approve"
+		}else{
+		form.searchbutton.value = "Show"
+		}
+		}
+		}
+
+		</script>
+		end jscript
+
+
+end screen

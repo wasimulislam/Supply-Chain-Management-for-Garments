@@ -1,0 +1,194 @@
+screen acreqdetailpay
+		sidebar list one
+		sections form one, jscript myscript
+
+
+		list one
+		caption "Payment Detail for " + acreqdetail.xacreqnum("xacreqnum='"+xacreqnum+"'")
+		table acreqdetail
+		order xrow
+		fixed xacreqnum
+		dtlengthmenu [10,25,50,100, -1], [10,25,50,100, "All"]
+		rows 20
+		objects  xrow attrib(link "login?screen=acreqdetailpay&command=Show&xrow=?"), ~
+		xitem,~
+		desc equals((select xdesc from caitem where zid=acreqdetail.zid and xitem=acreqdetail.xitem)),~
+		xcost,xamount,xloanamt
+		headers "Row No","Item","Description","Requested Amount","Paid Amount"," Settled Amount"
+		
+		//totals "","","Total","",sum,sum,sum
+		end list
+
+		form one 
+		caption "Payment Detail For " + acreqheader.xacreqnum("xacreqnum='"+xacreqnum+"'")
+		table acreqdetail
+		primary key xacreqnum,xrow
+		order xacreqnum,xrow
+		fixed xacreqnum
+		return "login"
+		layout 2
+		pstyle 3
+		objects ~
+			Update, Show,Clear,Top, Previous, Next, Bottom,Return,"<p>" ,~ //Add,Delete,
+			xrow attrib(row 0 1),,xlegalcase display(hide),case display(hide),xitem display(const),~
+			xitemdesc,xcost display(const),xothers display(hide),xamount,xloanamt display(const),xbudgetamt display(hide),xadamount display(hide),xpaid display(hide)
+
+		field xdesc
+		Caption Fund Requisition No 
+		display text
+		end Field
+		
+		field xnote
+		Caption Justification
+		end Field
+		
+		field xamount
+		Caption Paid Amount
+		end Field
+		
+		field xloanamt
+		Caption Settlement Amount
+		end Field
+		
+		field xrow
+		event before 
+		if acreqheader.xstatus("xacreqnum='"+xacreqnum+"'") .ne. "Open" .and. acreqheader.xstatus("xacreqnum='"+xacreqnum+"'") .ne. "Rejected" .and. acreqheader.xstatus("xacreqnum='"+xacreqnum+"'") .ne. "" 
+		set #field(Delete.attrib) = "disabled" 
+		set #field(Add.attrib) = "disabled" 
+		end if
+		if acreqheader.xstatusreq("xacreqnum='"+xacreqnum+"'") .eq. "Received"
+		set #field(Update.attrib) = "disabled" 
+		end if
+		end event
+		end Field
+		
+		field xrate
+		Caption Rate
+		default 1
+		end Field
+		
+		field xcost
+		Caption Request Amount
+		default 0
+		end Field
+		
+		field xothers
+		Caption Other Cost
+		default 0
+		end Field
+		
+		field xlineamt
+		Caption total Cost
+		default 0
+		end Field
+		
+		filed xitem
+		
+		end field
+		
+        field xitemdesc
+          caption Description
+          attrib local
+          display const
+          event after
+            set xitemdesc=caitem.xdesc("xitem='"+xitem+"'")
+          end event
+        end field		
+		
+		
+		field xlegalcase
+		Caption Case Number
+		pick list xlegalcase
+		end Field
+		
+		field case
+		Caption Case Detail 
+		attrib local
+		event after
+		if xlegalcase .ne. ""
+		set case=xcodes.xlong("xcode='"+xlegalcase+"' and xtype='Case'")+"<br><font SIZE=2>"</font>"
+		end if
+		end event
+		end Field
+		
+	
+
+		field Add
+		event before
+		set xlegalcase =#trim(xlegalcase)
+		set item=#sesql("select xitem from acreqdetail where zid='"+#id+"'  and xacreqnum='"+xacreqnum+"' and xitem='"+xitem+"'")
+		//set case=#sql("select xcode from xcodes where xcode='"+xlegalcase+"' and xtype='Case'")
+		set matter=#sql("select xitem from caitem where xitem='"+xitem+"' and xgitem='Cost'")
+		if xitem .eq. ""
+			error "Please select Item!"
+		else if item .eq. xitem
+			error "Already Exists"
+		
+		else if matter .eq. ""
+			error "Incorrect Item"
+		else if xamount > xcost
+			error "Paid amount should not greater than Request amount"
+		end if
+		end event
+		end field
+
+		field Update
+		event before
+		if xamount > xcost
+			error "Paid amount should not greater than Request amount"
+		else if xcost > xamount
+			error "Paid amount should not Less than Approved amount"
+		end if
+		end event
+		event after
+		
+		end event
+		end field
+
+		field Delete
+		event before
+		end event
+		end field		
+
+
+
+
+
+
+		embed onsubmit="return submitit(this)"
+
+        field Return
+          embed onclick="clicked(this)"
+        end field
+
+
+
+		end form
+
+		jscript myscript
+
+		<script language="javascript" type="text/javascript">
+		var detail
+
+		function clicked(b){
+		detail=b.value
+		}
+		function submitit(form){
+		 if (detail=="Return"){
+            form.screen.value = "acreqheaderpay"
+            form.searchbutton.value =  "Find xacreqnum=?"
+          }
+		if (detail=="Send for Approval"){
+		if(confirm('Are You Confirm ?')){
+		form.searchbutton.value = "Send for Approval"
+		}else{
+		form.searchbutton.value = "Show"
+		}
+		}
+		}
+
+		</script>
+		end jscript
+
+
+end screen

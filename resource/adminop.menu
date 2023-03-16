@@ -1,0 +1,19 @@
+//adminop.menu
+//-------------------------------------------------------------------
+option                           |action
+//-------------------------------------------------------------------
+PI Update(Admin)            		|#classPath+"/login?screen=opordlcheaderadmin" 
+DO Update(Admin)            		|#classPath+"/login?screen=opdoheaderadmin" 
+DO Reject(Admin)            		|#classPath+"/login?screen=opdobulkheaderappadmin" 
+DO Reset (Admin)              				|#classPath+"/login?screen=opdodeleteadmin" 
+SMCO Update (Admin)             			|#classPath+"/login?screen=smopordheaderadmin" 
+SMRQ Update (Admin)         			|#classPath+"/login?screen=moreqheadersmadmin" 
+//Checking PI with Duplicate Items  |#classPath+"/login?screen=*viewcrystal oppiprintfordup(3;in,st,st;zid,item,invno;xitem=Item,xordernum=PI Number,xviewtype=Report View)"
+//Entry Review                      |#classPath+"/login?screen=*aspcrystal adminreviewpass(xstart=Issue No,xpassword=Password)"
+//User and Date wise Entry Review   |#classPath+"/login?screen=*aspcrystal admindatewisereview(zemail=User,xdate=Fromdate=#date,xdate=To Date=#date,xpassword=Password)"
+//The Business                     |#classPath+"/login?screen=zbusiness"
+//Modules                          |#classPath+"/login?screen=*modules"
+//Models                           |#classPath+"/login?screen=*models"
+ 
+
+//-------------------------------------------------------------------

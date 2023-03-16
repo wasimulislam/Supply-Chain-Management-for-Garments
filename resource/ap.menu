@@ -1,0 +1,18 @@
+//Accounts.menu
+//-------------------------------------------------------------------
+option                           |action
+//-------------------------------------------------------------------
+//AP Voucher Entry                 |#classPath+"/login?screen=apinvoice"
+Transfer To AP(GRN)   	               |#classPath+"/login?screen=pogrnheaderac"
+Transfer To AP(SQC)  	               |#classPath+"/login?screen=posqcheaderac"
+Supplier Payment			  	   |#classPath+"/login?screen=appayment"
+AP Opening Entry            	 |#classPath+"/login?screen=arhedapob"
+//Codes & Parameters               |#classPath+"/login?menu=apcodes"
+//Posting                          |#classPath+"/login?screen=acpost"
+//UnPosting                        |#classPath+"/login?screen=acunpost"
+Supplier Invoice                  |#classPath+"/login?screen=apinvoice"
+
+//Transfer to General Accounts     |#classPath+"/login?screen=artogltransfer"
+Reports                          |#classPath+"/login?menu=apreports"
+//-------------------------------------------------------------------
+

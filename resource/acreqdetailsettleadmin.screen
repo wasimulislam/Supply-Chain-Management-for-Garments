@@ -1,0 +1,218 @@
+screen acreqdetailsettleadmin
+		sidebar list one
+		sections form one, jscript myscript
+
+
+		list one777
+		caption "Fund Requisition Detail for IOU"
+		table acreqdetail
+		order xrow
+		fixed xacreqnum
+		rows 20
+		objects  xrow attrib(link "login?screen=acreqdetailsettleadmin&command=Show&xrow=?"), ~
+		xaccdr,~
+		desc equals((select xdesc from acmst where zid=acreqdetail.zid and xacc=acreqdetail.xaccdr)),~
+		xloanamt
+		headers "Row No","Debit Account","Account Description","Settled Amount"
+		
+		totals "Total","",sum,sum
+		end list
+		list one
+		caption "Fund Requisition Detail for IOU"
+		table acreqdetail
+		order xrow
+		fixed xacreqnum
+		rows 20
+		objects  xrow attrib(link "login?screen=acreqdetailsettleadmin&command=Show&xrow=?"), ~
+		xitem,~
+		desc equals((select xdesc from caitem where zid=acreqdetail.zid and xitem=acreqdetail.xitem)),xaccdr,~
+		desc equals((select xdesc from acmst where zid=acreqdetail.zid and xacc=acreqdetail.xaccdr)),xcost,xamount,~
+		xloanamt
+		headers "Row No","Item","Item Description","Debit Account","Account Description","Request Amount","Paid Amount","Settled Amount"
+		
+		//totals "","","Total","",sum,sum,sum
+		end list
+
+		form one 
+		caption "Final Settlement Detail (Admin) For IOU  : " + acreqheader.xacreqnum("xacreqnum='"+xacreqnum+"'")
+		table acreqdetail
+		primary key xacreqnum,xrow
+		order xacreqnum,xrow
+		fixed xacreqnum
+		return "login"
+		layout 2
+		pstyle 3
+		objects ~
+			Update,Show,Clear,Top, Previous, Next, Bottom,Return,"<p>" ,~ //Add,Delete,
+			xrow attrib(row 0 1),,xitem display(const),~
+			xitemdesc,xaccdr,xaccdesc,~
+			xcost display(const),~
+			xothers display(hide),xamount display(const),~
+			xloanamt ,xbudgetamt display(hide),~
+			xadamount display(hide),xpaid display(hide)
+
+		field xdesc
+		Caption Fund Requisition No 
+		display text
+		end Field
+		
+		field xaccdesc
+          caption Account Name
+          attrib local
+          display const
+          event after
+            set xaccdesc=acmst.xdesc("xacc='"+xaccdr+"'")
+          end event
+        end field
+		
+		field xnote
+		Caption Justification
+		end Field
+		
+		field xamount
+		Caption Paid Amount
+		end Field
+		
+		field xloanamt
+		Caption Settlement Amount
+		end Field
+		
+		field xrow
+		event before 
+		if acreqheader.xstatusloan("xacreqnum='"+xacreqnum+"'") .eq. "Applied" .or. acreqheader.xstatusloan("xacreqnum='"+xacreqnum+"'") .eq. "Recommended" .or. acreqheader.xstatusloan("xacreqnum='"+xacreqnum+"'") .eq. "Approved"
+		set #field(Delete.attrib) = "disabled" 
+		set #field(Add.attrib) = "disabled" 
+		//set #field(Update.attrib) = "disabled" 
+		end if
+		if acreqheader.xstatusreq("xacreqnum='"+xacreqnum+"'") .eq. "Settled"
+		//set #field(Update.attrib) = "hidden"
+		end if
+		
+		end event
+		end Field
+		
+		field xrate
+		Caption Rate
+		default 1
+		end Field
+		
+		field xcost
+		Caption Request Amount
+		default 0
+		end Field
+		
+		field xothers
+		Caption Other Cost
+		default 0
+		end Field
+		
+		field xlineamt
+		Caption total Cost
+		default 0
+		end Field
+		
+		filed xitem
+		
+		end field
+		
+        field xitemdesc
+          caption Description
+          attrib local
+          display const
+          event after
+            set xitemdesc=caitem.xdesc("xitem='"+xitem+"'")
+          end event
+        end field		
+		
+		
+		field xlegalcase
+		Caption Case Number
+		pick list xlegalcase
+		end Field
+		
+		field case
+		Caption Case Detail 
+		attrib local
+		event after
+		if xlegalcase .ne. ""
+		set case=xcodes.xlong("xcode='"+xlegalcase+"' and xtype='Case'")+"<br><font SIZE=2>"</font>"
+		end if
+		end event
+		end Field
+		
+	
+
+		field Add
+		event before
+		set xlegalcase =#trim(xlegalcase)
+		set item=#sesql("select xitem from acreqdetail where zid='"+#id+"'  and xacreqnum='"+xacreqnum+"' and xitem='"+xitem+"'")
+		//set case=#sql("select xcode from xcodes where xcode='"+xlegalcase+"' and xtype='Case'")
+		set matter=#sql("select xitem from caitem where xitem='"+xitem+"' and xgitem='Cost'")
+		//if xitem .eq. ""
+			//error "Please select Item!"
+		//else if item .eq. xitem
+			//error "Already Exists"
+		if xamount > xcost
+			error "Paid amount should not greater than Request amount"
+		end if
+		end event
+		end field
+
+		field Update
+		event before
+		if xamount > xcost
+			error "Paid amount should not greater than Request amount"
+		end if
+		end event
+		event after
+		
+		end event
+		end field
+
+		field Delete
+		event before
+		end event
+		end field		
+
+
+
+
+
+
+		embed onsubmit="return submitit(this)"
+
+        field Return
+          embed onclick="clicked(this)"
+        end field
+
+
+
+		end form
+
+		jscript myscript
+
+		<script language="javascript" type="text/javascript">
+		var detail
+
+		function clicked(b){
+		detail=b.value
+		}
+		function submitit(form){
+		 if (detail=="Return"){
+            form.screen.value = "acreqheadersettleadmin"
+            form.searchbutton.value =  "Find xacreqnum=?"
+          }
+		if (detail=="Send for Approval"){
+		if(confirm('Are You Confirm ?')){
+		form.searchbutton.value = "Send for Approval"
+		}else{
+		form.searchbutton.value = "Show"
+		}
+		}
+		}
+
+		</script>
+		end jscript
+
+
+end screen

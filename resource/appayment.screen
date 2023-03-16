@@ -1,0 +1,321 @@
+screen appayment
+
+     sidebar list detail,list allocation
+     sections form one,jscript myscript
+			
+     list detail
+        caption "Detail List"
+        table artrn
+        order xvoucher,xrow
+        fixed xvoucher
+        dtlengthmenu [10,25,50,100, -1], [10,25,50,100, "All"]
+		rows 20
+        objects  xrow attrib(link "login?screen=artrncas&command=Show&xvoucher=?&xrow=?"), ~
+                xacc,desc equals((select xdesc from acmst where acmst.zid=artrn.zid and acmst.xacc=artrn.xacc)),xprime
+
+        totals "Totals","","",sum
+        header "Line No","Account Code","Description","Amount"
+     end list
+     list invoice
+        caption "<br><center><b>"Unallocated Voucher List"</b>"
+		table apallocationarcview
+        order xcus,xvoucher
+        fixed xcus
+        select "xprime> 0"
+        dtlengthmenu [10,25,50,100, -1], [10,25,50,100, "All"]
+		rows 10
+        objects ~
+        xvoucher,xprime,xdate
+
+        headers "Invoice Number","Balance","Date"
+     end list
+		
+     list allocation
+        caption "Allocated Voucher List"
+        table apalcarcview
+        order xvoucher,xinvnum
+        fixed xvoucher
+        dtlengthmenu [10,25,50,100, -1], [10,25,50,100, "All"]
+		rows 10
+        objects ~
+        xinvnum attrib(link "login?screen=aralc&command=Show&xinvnum=?"), ~
+        xdate,xbalance,xamount
+		header "Invoice No","Inv Date","Invoice Balance","Allocated Amt"
+        totals "","Totals","",sum
+     end list
+
+     form one
+        caption "Supplier Payment Entry"
+        table arhed
+		primarykey xvoucher
+        order xvoucher
+        select "left(xvoucher,4)='PM--'"
+        return "login"
+        pstyle 3
+        layout 2   
+		objects Show,Add,Delete,Update,Top,Next,Previous,Bottom,Clear,Detail,*next,GRN Allocate,PRN Allocate,Transfer To GL,"<p>",~		
+      //  objects Add,Show,Clear,Update,Delete,Detail, Modify, *next,Top,Previous,Next,Bottom,Allocate,Transfer To GL,"<p>" ,~
+                xvoucher,xdate,xcus,xorg,xbank,xbankname,xwh display(hide),~
+                xprime,xbalprime display(hide),xpaymenttype,xref,xdateref,xvatamt,xaitamt,xdiscprime display(hide),~
+                xstatusjv display(const),xdocnum display(const),xnote,xprnamt display(const),xtypetrn display(hide),~
+                //hide
+                xsign display(hide),~
+                xchgsprime display(hide),xpaymentterm display(hide),xtype display(hide)
+	
+	
+		field xcus
+			caption Supplier Code
+			pick list casup
+		end field
+
+		field xdate
+			caption Payment Date
+		end field
+
+		field xpaymenttype
+			pick "Cheque"
+		end field
+		
+		field xprime
+			caption Total Paid Amount
+		end field
+
+        field xvatamt
+          caption VAT Deducted At Source
+          display text
+        end field
+
+        field xaitamt
+          caption AIT Deducted At Source
+          display text
+        end field
+
+        field xdocnum
+          caption Payment Voucher No.
+        end field
+		
+        field xorg
+          attrib local
+          display constant
+          caption Supplier Name
+          event after
+            set xorg=cacus.xorg("xcus='"+xcus+"'")
+          end event
+        end field
+
+	 field xbank
+		width 30
+			//pick list xacc
+	 end field
+
+        field xbankname
+          attrib local
+          display const
+          caption Bank Name
+          event after
+            set xbankname=cabank.xname("xbank='"+xbank+"'")+"<br>"+cabank.xbacc("xbank='"+xbank+"'")+"<br>"+cabank.xbranch("xbank='"+xbank+"'")+"<br>"+cabank.xmadd("xbank='"+xbank+"'")+"<br>"+cabank.xacc("xbank='"+xbank+"'")+" - " +acmst.xdesc("xacc='"+cabank.xacc("xbank='"+xbank+"'")+"'")+"<br>"+
+          end event
+        end field
+
+        field xname
+          display constant
+          event after
+          end event
+        end field
+
+        field xnote
+		height 3
+          width 60
+		  column 2
+        end field
+
+
+        field xvoucher
+			width 15	
+         caption Payment Number
+		 display text
+		 pick list xvoucherpm
+	   event after    
+		set globals(xvoucher)=xvoucher
+            set globals(xcus)=xcus
+	     	      if xstatusjv .eq. "Confirmed"
+		        // 	set #field(add.attrib)="disabled"
+         		//	set #field(update.attrib)="disabled"
+					set #field(Transfer.attrib) = "disabled"
+					set #field(Modify.attrib) = "disabled"
+					set #field(delete.attrib) = "disabled"
+					set #field(update.attrib) = "disabled"
+            	end if
+				
+				if xdate .lt. '"+#date+"'
+				//	set #field(update.attrib)="disabled"
+					set #field(update.attrib) = "disabled"
+				end if
+			double alcamt = #sql("select xamount from aralc where xvoucher='"+xvoucher+"'")
+			if alcamt > 0
+			set #field(xprime.attrib)="const"
+			//set #field(xvatamt.attrib)="const"
+			//set #field(xaitamt.attrib)="const"
+			set #field(xcus.attrib)="const"
+			end if
+		//class careports(getjspReport{appmprint,1,xvoucher,Print Money Receipt})
+		class careports(getReport{appmprint;2;in,st;zid,mr;xvoucher;Print Supplier Payment Receipt})
+          end event
+        end field
+
+    field add
+		event before
+			set backdate=#sql("select xdateexp from acdef")
+			set backentry=#sql("select xbacklock from acdef")	
+			set xstatusjv="Open"
+		    set xtypetrn = "Purchase"
+			set xtype="PM--"
+			set xsign = "1"
+			if xexch == 0
+			set xexch = 1
+			end if
+			//if xprime == 0
+				//error "Cannot Proceed -- Amount is Blank"
+			if xcus .eq. ""
+				error "Cannot Proceed -- Supplier Invalid"
+			else if backentry .eq. "No" .and. xdate .le. backdate
+				error "Back Lock Entry does not allow!"	
+			//else if xbank .eq. ""
+			//	error "Cannot Proceed -- Bank A/C Required"
+
+			else 
+				set xdocnum=""
+				set xprnamt=0.00
+				set xbalprime=xprime
+				set xstatusjv="Open"
+				set xtypetrn = "Purchase"
+				set xtype="PM--"
+				set xsign = "1"
+				set trn = "PM--"
+				set trn = "PM--"
+				set xvoucher = #trn("AR Transactions",trn,12)
+			end if
+      end event
+      event after
+            set command = "add"
+            set temp = #spsql(zabsp_ArhedChk,#id,#user,xvoucher,xcus,command)
+			//set temp = #spsql(sp_validateAfterARcas,#id,#user,xvoucher,xcus,command)
+            action Show
+          end event
+        end field
+
+		field Update
+			event before
+				set backdate=#sql("select xdateexp from acdef")
+				set backentry=#sql("select xbacklock from acdef")	
+				if xexch == 0
+				set xexch = 1
+				end if
+				set temp = #sql("select xinvnum from aralc where xvoucher='"+xvoucher+"'")
+				if #result .eq. "false"
+				set xbalprime=xprime
+				end if
+				if arhed.xstatusjv("xvoucher='"+xvoucher+"'") .ne. "Open"
+				error "Already Transfer to GL!"
+				else if backentry .eq. "No" .and. xdate .le. backdate
+				error "Back Lock Entry does not allow!"	
+				end if
+			end event
+			event after
+			//double alcamt = 0.00
+			//double vataitamt = 0.00
+			//double totvataitamt = 0.00
+			//double primeamt = 0.00
+			//double prntotamt = 0.00
+			//set alcamt = #sesql("select sum(xamount) from aralc where zid = '"+#id+"' and xvoucher='"+xvoucher+"'")
+			//set vataitamt = #sesql("select xvatamt+xaitamt from arhed where zid = '"+#id+"' and xvoucher='"+xvoucher+"'")
+			//set prntotamt = #sql(double,"select sum(xamount) from apprnalc where xvoucher='"+xvoucher+"'")
+			//set totvataitamt=vataitamt+prntotamt
+			//set primeamt=alcamt-totvataitamt
+			//if primeamt<=0.00
+			//set primeamt=primeamt*-1
+			//print primeamt
+			//print prntotamt
+			//set temp = #sesql("update arhed set zutime=getdate(),zuuserid='"+#user+"',xprime=0.00,xbase=0.00 where zid = '"+#id+"' and xvoucher='"+xvoucher+"'")
+			//end if
+			// if primeamt>0.00
+			// set primeamt=primeamt*1
+            //
+			//set temp = #sesql("update arhed set zutime=getdate(),zuuserid='"+#user+"',xprime="+primeamt+",xbase="+primeamt+" where zid = '"+#id+"' and xvoucher='"+xvoucher+"'")
+			//end if
+			set xbase=xprime*xexch
+            action Show
+          end event
+		end field
+
+        field Transfer
+			event before
+				set temp = #sql("select xrow from artrn where xvoucher='"+xvoucher+"'")
+				if #result .eq. "false"
+					set acc = cabank.xacc("xbank='"+xbank+"'")
+					if xbank .eq. ""
+						error "Cannot Proceed -- Bank Name Required"
+					else if acc .eq. ""
+						error "Cannot Proceed -- Account Head Not Set With Bank Code"
+					else if xprime == 0
+						error "Cannot Proceed -- Paid Amount Is "+xprime
+					end if
+				end if
+				set temp = #sql("select xinvnum from aralc where xvoucher='"+xvoucher+"'")
+				if #result .eq. "false"
+					error "Cannot Proceed -- Please Allocate Invoice First"
+				end if
+			end event
+          event after  
+            set temp = #spsql(zabsp_AP_transferAPtoGL,#id,#user,xvoucher)
+			action show
+			//set voucher = #sql("select xvoucher from acheader where xinvnum='"+xinvnum+"'")
+		    print "<font color=red size=+1>Voucher No "+xdocnum+" Created</font>"
+          end event
+        end field
+
+
+        embed onsubmit="submitit(this)"
+
+        field Detail
+          embed onclick="clicked(this)"
+        end field
+
+        field GRN Allocate
+          embed onclick="clicked(this)"
+        end field
+		
+        field PRN Allocate
+          embed onclick="clicked(this)"
+        end field
+
+     end form
+
+     jscript myscript
+
+        <script language="javascript" type="text/javascript">
+        var detail
+
+        function clicked(b){
+          detail=b.value
+        }
+        function submitit(form){
+          if (detail=="Detail"){
+            form.screen.value = "aptrnpayment"
+            form.searchbutton.value = "Top"
+          }
+          if (detail == "GRN Allocate"){
+            form.screen.value = "apalc"
+            form.searchbutton.value = "Find xvoucher=?"
+          }
+		  if (detail == "PRN Allocate"){
+            form.screen.value = "apprnalc"
+            form.searchbutton.value = "Find xvoucher=?"
+          }
+        }
+        </script>
+     end jscript
+
+
+
+end screen

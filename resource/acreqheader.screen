@@ -1,0 +1,375 @@
+screen acreqheader
+		sidebar list one,list detail
+		sections form one, jscript myscript
+
+	list one
+		caption "Fund Requisition for IOU"
+		table acreqheader
+		order xacreqnum desc
+		select "left(xacreqnum,3)='IOU'"	
+        dtlengthmenu [10,25,50,100, -1], [10,25,50,100, "All"]
+		rows 5
+        objects  xacreqnum attrib(link "login?screen=acreqheader&command=Show&xacreqnum=?"),xdate,xstatus,~
+		xidsupdesc equals((select xname from pdmst where zid=acreqheader.zid and xposition=acreqheader.xidsup)),~
+				 xidsupdesc2 equals((select xname from pdmst where zid=acreqheader.zid and xposition=acreqheader.xsuperior2))
+		headers "Requisition No","Date","Status","Approver","OR >>>>>> Approver"
+	end list
+	
+		list detail
+		caption "Fund Requisition Details for IOU"
+		table acreqdetail
+		order xrow
+		fixed xacreqnum
+		dtlengthmenu [10,25,50,100, -1], [10,25,50,100, "All"]
+		rows 5
+		objects  xrow attrib(link "login?screen=acreqdetail&command=Show&xrow=?"), ~
+		xitem,~
+		item equals((select xdesc from caitem where zid=acreqdetail.zid and caitem.xitem=acreqdetail.xitem)),~
+		xcost,xamount,xloanamt
+		headers "Row No","Item","Item Description","Request Amount","Paid Amount","Settlement Amount"
+		
+		totals "","","Total",sum,sum,sum
+		end list
+		
+		
+
+		form one
+		caption "IOU Requisition Entry"
+		table acreqheader
+		primary key xacreqnum
+		order xacreqnum
+		select "left(xacreqnum,3)='IOU'"
+		return "login"
+		layout 3
+		pstyle 3
+		objects ~
+			Add,Update, Delete,Show,Clear,Top, Previous, Next, Bottom,Detail,Send for Approval,"<p>" ,~ //Terms and Conditions,
+			xacreqnum,xdate,xdateret display(const),~
+			xdaterec display(const),xstatus  display(const),xstatusreq display(const),~
+			xstatusloan  display(const) ,xstaff,name,,xnote,xaccdr display(hide),xacccr display(hide),accdesc display(const),,~
+			signatorysec display(const),,~
+			xpkey display(hide) attrib(local),~
+			xpreparer display(hide),preparer display(const),~	
+			xidsup display(hide),~			
+			xsignatory1 display(hide),signatory1  display(const),~
+			xsignatory2 display(hide),signatory2 display(const),~
+			xsignatory3 display(hide),signatory3 display(const),~
+			xsignatory4 display(hide),signatory4  display(const),~
+			xsignatory5 display(hide),signatory5 display(const),~
+			xsignreject display(hide),signreject display(const),~
+			xnote1 display(const)
+
+		field xstaff
+		Caption Requester 
+		end Field
+		
+		field xstatusloan
+		Caption Settlement Approval Status 
+		end Field
+		
+		field xdaterec
+		Caption Settlement Date
+		default "2999-01-01"
+		end Field
+		
+		field xdate
+		Caption Requested Date
+		end Field
+		
+		field name
+          caption Requester Name
+          attrib local
+          display const
+          event after
+            set name=pdmst.xname("xstaff='"+xstaff+"'")
+          end event
+        end field
+		
+		field xdesc
+		Caption Fund Collection No  
+		default #date
+		end Field
+		
+		field xdateret
+		Caption Paid Date
+		default "2999-01-01"
+		end Field
+		
+		field xnote
+		Caption Preparer's Note
+		end Field
+		
+		field xacc
+		Caption Debit Account
+		end Field
+		
+		field accdesc
+          caption Account Name
+          attrib local
+          display hide
+          event after
+            set accdesc=acmst.xdesc("xacc='"+xacc+"'")
+          end event
+        end field
+		
+		field xstatusreq
+		end Field
+		
+		
+		field xcompany
+		Caption Payee Company
+		pick list xcompany
+		end Field
+		
+		
+		
+		field xnote1
+		Caption Reject Note 
+		end Field
+
+		field xacreqnum
+		Caption Requisition No
+		width 12
+		pick list xacreqnum
+		event after
+		if xacreqnum .ne. ""
+		set #field(add.attrib) = "disabled"
+		end if
+		set globals(xacreqnum)=xacreqnum
+		 class careports(getReport{iouprint;2;in,st;zid,reqnum;xacreqnum;View Fund Requisition})
+		 if acreqheader.xstatus("xacreqnum='"+xacreqnum+"'") .ne. "Open" .and. acreqheader.xstatus("xacreqnum='"+xacreqnum+"'") .ne. "Rejected"
+		set #field(Send.attrib) = "disabled" 
+		//set #field(Update.attrib) = "disabled" 
+		//set #field(Add.attrib) = "disabled" 
+		end if
+		end event
+		end field
+
+
+
+
+		field signatorysec
+		attrib local
+		caption <span class=sheader style="	BACKGROUND:#0480ba;	PADDING-BOTTOM: 5px;PADDING-LEFT: 10px; PADDING-RIGHT: 50px; 	PADDING-TOP: 2px;">Signatories</span>
+		display const
+		//column 2
+		end field
+
+		field preparer
+		caption Preparer
+		attrib local
+		event after
+		if xpreparer .ne. ""
+		set preparer=pdmst.xname("xstaff='"+xpreparer+"'")+"<br><font SIZE=2>"+pdmst.xdesignation("xstaff='"+xpreparer+"'")+", "+pdmst.xdeptname("xstaff='"+xpreparer+"'")+"</font>"
+		end if
+		end event
+		end field
+
+		field signatory1
+		caption pick,"select xsignatory1 from pdsignatoryrpt where xtypetrn='Legal Fund Approval'"
+		attrib local
+		event after
+		if xsignatory1 .ne. ""
+		set signatory1=pdmst.xname("xstaff='"+xsignatory1+"'")+"<br><font SIZE=2>"+pdmst.xdesignation("xstaff='"+xsignatory1+"'")+", "+pdmst.xdeptname("xstaff='"+xsignatory1+"'")+"</font>"
+		end if
+		end event
+		end field
+
+		field signatory2
+		caption pick,"select xsignatory2 from pdsignatoryrpt where xtypetrn='Legal Fund Approval'"
+		attrib local
+		event after
+		if xsignatory2 .ne. ""
+		set signatory2=pdmst.xname("xstaff='"+xsignatory2+"'")+"<br><font SIZE=2>"+pdmst.xdesignation("xstaff='"+xsignatory2+"'")+", "+pdmst.xdeptname("xstaff='"+xsignatory2+"'")+"</font>"
+		end if
+		end event
+		end field
+
+
+		field signatory3
+		caption pick,"select xsignatory3 from pdsignatoryrpt where xtypetrn='Legal Fund Approval'"
+		attrib local
+		event after
+		if xsignatory3 .ne. ""
+		set signatory3=pdmst.xname("xstaff='"+xsignatory3+"'")+"<br><font SIZE=2>"+pdmst.xdesignation("xstaff='"+xsignatory3+"'")+", "+pdmst.xdeptname("xstaff='"+xsignatory3+"'")+"</font>"
+		end if
+		end event
+		end field
+		
+		field signatory4
+			caption pick,"select xsignatory4 from pdsignatoryrpt where xtypetrn='Legal Fund Approval'"
+			attrib local
+			event after
+			if xsignatory4 .ne. ""
+			set signatory3=pdmst.xname("xstaff='"+xsignatory4+"'")+"<br><font SIZE=2>"+pdmst.xdesignation("xstaff='"+xsignatory4+"'")+", "+pdmst.xdeptname("xstaff='"+xsignatory4+"'")+"</font>"
+			end if
+			end event
+			end field
+			
+			field signatory5
+			caption pick,"select xsignatory5 from pdsignatoryrpt where xtypetrn='Legal Fund Approval'"
+			attrib local
+			event after
+			if xsignatory5 .ne. ""
+			set signatory5=pdmst.xname("xstaff='"+xsignatory5+"'")+"<br><font SIZE=2>"+pdmst.xdesignation("xstaff='"+xsignatory5+"'")+", "+pdmst.xdeptname("xstaff='"+xsignatory3+"'")+"</font>"
+			end if
+			end event
+			end field
+
+		field signreject
+		caption Reject Signatory
+		attrib local
+		event after
+		if xsignreject .ne. ""
+		set signreject=pdmst.xname("xstaff='"+xsignreject+"'")+"<br><font SIZE=2>"+pdmst.xdesignation("xstaff='"+xsignreject+"'")+", "+pdmst.xdeptname("xstaff='"+xsignreject+"'")+"</font>"
+		end if
+		end event
+		end field
+
+		field xstatus
+		caption Approval Status  
+		event after
+		if acreqheader.xstatus("xacreqnum='"+xacreqnum+"'") .ne. "Open" .and. acreqheader.xstatus("xacreqnum='"+xacreqnum+"'") .ne. "Rejected"
+		set #field(delete.attrib) = "disabled"
+		//set #field(Update.attrib) = "disabled"
+		end event
+		end if
+		end field
+		
+		field show
+			event before
+			end event
+			event after
+			set xpkey=xacreqnum
+			end event	  
+		end field	
+
+
+		field send
+		event before
+		double reqamt=#sql("select sum(xcost) from acreqdetail where xacreqnum='"+xacreqnum+"'")
+		if acreqheader.xstatus("xacreqnum='"+xacreqnum+"'") .ne. "Open" .and. acreqheader.xstatus("xacreqnum='"+xacreqnum+"'") .ne. "Rejected" 
+		error "Request Already Sent."
+		else if reqamt<1
+		error "Please Add Detail"
+		end if
+		end event
+		event after
+		//set temp =#spsql(zabsp_Confirmed_Request,#id,#user,#position,"01",xacreqnum,"IOU")
+		action show
+		end event
+		end field
+
+
+		field Add
+		event before 
+		if xstaff .eq. ""
+				error "Cannot Proceed - Please Select Requester"
+		else if xstaff .ne. pdmst.xstaff("xstaff='"+xstaff+"'")
+				error "Cannot Proceed - Invalid Employee"
+		else
+			set xpreparer=pdmst.xstaff("xposition='"+#position+"'") 
+			set year1=#sub(xdate,0,4)
+			set name=xcodes.xfield("xcode='"+xcompany+"' and xtype='Company'")
+			set company=#sql("select xcode from xcodes where xcode='"+xcompany+"' and xtype='Company'")		
+			set xstatus="Open"
+			set xstatusreq="Open"
+			set xstatusloan="Open"
+			set xaccdr="1103001"
+			set xacccr="1103101"
+			set xacreqnum = #trn("Requisition Number","IOU-",12) 
+			set xpkey=xacreqnum
+		end if
+		end event
+		end field
+
+		field Update
+		event before
+		set year1=#sub(xdate,0,4)
+		if xacreqnum .eq. ''
+		error "Please show First!"
+		else if xpkey .ne. xacreqnum
+		error "Please show First!" 
+		else if acreqheader.xstatus("xacreqnum='"+xacreqnum+"'") .ne. "Open" .and. acreqheader.xstatus("xacreqnum='"+xacreqnum+"'") .ne. "Rejected"
+		error "Cannot Update Record Requisition Already Complete"
+		end if
+		end event
+		end if
+		end event
+		event after 
+		action show
+		end event
+		end field
+
+		field Delete
+		event before
+		if xacreqnum .eq. ""
+		error "Please show First!"
+		else if acreqheader.xstatus("xacreqnum='"+xacreqnum+"'") .ne. "Open" .and. acreqheader.xstatus("xacreqnum='"+xacreqnum+"'") .ne. "Rejected"
+		error "Cannot Delete Record"
+		end if
+		end event
+		event after
+		action show
+		end event
+		end field		
+
+
+
+
+
+
+		embed onsubmit="return submitit(this)"
+		//embed onsubmit="submitit(this)"
+
+
+		field Send
+		embed onclick="clicked(this)"
+		end field
+		
+
+        field Detail
+          embed onclick="clicked(this)"
+        end field
+		
+		field Terms
+          embed onclick="clicked(this)"
+        end field
+
+
+
+
+		end form
+
+		jscript myscript
+
+		<script language="javascript" type="text/javascript">
+		var detail
+
+		function clicked(b){
+		detail=b.value
+		}
+		function submitit(form){
+		if (detail=="Terms and Conditions"){
+            form.screen.value = "pdrfpterms"
+            form.searchbutton.value = "Top"
+          }
+		 if (detail=="Detail"){
+            form.screen.value = "acreqdetail"
+            form.searchbutton.value = "Top"
+          }
+		  
+		if (detail=="Send for Approval"){
+		if(confirm('Are You Confirm ?')){
+		form.searchbutton.value = "Send for Approval"
+		}else{
+		form.searchbutton.value = "Show"
+		}
+		}
+		}
+
+		</script>
+		end jscript
+
+
+end screen

@@ -1,0 +1,17 @@
+//adminar.menu
+//-------------------------------------------------------------------
+option                           |action
+//-------------------------------------------------------------------
+AR Rate Update by Admin                    |#classPath+"/login?screen=aradminprocs"
+//MR Update Admin                    |#classPath+"/login?screen=arcasupadmin"
+//Transfer To AR Admin                   |#classPath+"/login?screen=optoartrnadmin" 
+//Customer Invoice                   |#classPath+"/login?screen=arhedadmin" 
+//Transfer To JV (Update)                    |#classPath+"/login?screen=pogrnheaderacadminjv" 
+//Entry Review                      |#classPath+"/login?screen=*aspcrystal adminreviewpass(xstart=Issue No,xpassword=Password)"
+//User and Date wise Entry Review   |#classPath+"/login?screen=*aspcrystal admindatewisereview(zemail=User,xdate=Fromdate=#date,xdate=To Date=#date,xpassword=Password)"
+//The Business                     |#classPath+"/login?screen=zbusiness"
+//Modules                          |#classPath+"/login?screen=*modules"
+//Models                           |#classPath+"/login?screen=*models"
+ 
+
+//-------------------------------------------------------------------

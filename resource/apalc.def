@@ -1,0 +1,13 @@
+product ERP on the Net
+
+table apalc
+  caption "AP Allocation"
+  columns  ztime,zutime, zid,~
+           xvoucher,xinvnum,xdate,xdatedue,xbalance,xamount
+
+  primary key zid, xvoucher,xinvnum
+  foreign key
+        zid references zbusiness.zid
+        zid,xvoucher references aphed.zid,xvoucher
+  end foreign key
+end table

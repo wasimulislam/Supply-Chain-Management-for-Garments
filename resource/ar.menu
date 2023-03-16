@@ -1,0 +1,26 @@
+//Accounts.menu
+//-------------------------------------------------------------------
+option                           |action
+//-------------------------------------------------------------------
+Transfer TO A/R		                |#classPath+"/login?menu=arsub"
+Money Receipts and Allocation     |#classPath+"/login?screen=arcas"
+//Write Off Transaction            |#classPath+"/login?screen=arwriteoff"
+//Write Off Allocation             |#classPath+"/login?screen=arwriteoffcr"
+//Transfer to General Accounts     |#classPath+"/login?screen=artogltransfer"
+	//Transfer TO A/R                  |#classPath+"/login?screen=optoartransfer"
+//Transfer TO A/R (New)                  |#classPath+"/login?screen=optoartrn"
+AR Opening Entry            |#classPath+"/login?screen=arhedarob"
+A/R Transactions                     |#classPath+"/login?screen=arhed"
+//Sample Transfer To AR            |#classPath+"/login?screen=smoptoartrndt"
+Reports                          |#classPath+"/login?menu=arreports"
+//AR Voucher Entry               |#classPath+"/login?screen=arinvoice"
+//Money Receipt                  |#classPath+"/login?screen=armrreceipt"
+//Loan Receipts Against Export LC|#classPath+"/login?screen=arcaslc"
+//LC Realization                 |#classPath+"/login?screen=arhedlcreal"
+//Cash Receipt                   |#classPath+"/login?screen=arcascash"
+//Cheque Receipt                 |#classPath+"/login?screen=arcascheque"
+//Cheque Transaction             |#classPath+"/login?screen=arbankin"
+//Transfer to General Accounts   |#classPath+"/login?screen=artogltransfer"
+//Reports                          |#classPath+"/login?menu=arreports"
+//-------------------------------------------------------------------
+

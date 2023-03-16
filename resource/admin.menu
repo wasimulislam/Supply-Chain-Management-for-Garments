@@ -1,0 +1,38 @@
+//admin.menu
+//-------------------------------------------------------------------
+option                           |action
+//-------------------------------------------------------------------
+//System Monitoring 			    |#classPath+"/login?screen=zsysanalysis"
+//Commercial            |#classPath+"/login?menu=admincom" 
+PO & GRN             |#classPath+"/login?menu=adminpo" 
+//PO Update            				|#classPath+"/login?screen=poordheaderup"
+//AP                         |#classPath+"/login?menu=adminap" 
+//AR                            |#classPath+"/login?menu=adminar" 
+Sales                            |#classPath+"/login?menu=adminop"
+HR Development (HRD)	|#classPath+"/login?menu=pdhrd"	                	|ca       |   		|hrm.png|180
+Finished Goods list By User     |#classPath+"/login?screen=*viewcrystal caitemalldetail(6;in,st,st,dt,dt,st;zid,fgitem,user,fdate,tdate,type;xgitem=Product Group,zauserid=User,xpidate=From Date=#date,xpidate=To Date=#date,xcitem=Item Type,xviewtype=Report View)"
+//Payroll                            |#classPath+"/login?menu=adminpd" 
+Item Master                            |#classPath+"/login?menu=admincaitem" 
+//Inventory                            |#classPath+"/login?menu=adminim" 
+//Extra Query                            |#classPath+"/login?menu=adminehoverqty" 
+
+//SR/SPR/TO/Loan Update			    |#classPath+"/login?screen=moreqheaderadmin"
+//PR Update		       				|#classPath+"/login?screen=poreqheaderserviceadmin"
+//PO Update		        			|#classPath+"/login?screen=poordheadercashadmin"
+//PAF Update		        			|#classPath+"/login?screen=appaymentreqhadmin"
+//GRN Update		        			|#classPath+"/login?screen=pogrnheaderadmin"
+//Voucher Update						|#classPath+"/login?screen=acheaderadmin"
+//Inventory Update 					|#classPath+"/login?screen=imtrnreadmin"
+//AR / AP Update 						|#classPath+"/login?screen=arhedadmin"
+//-----------------------------------below screens was off-------------
+	//Duplicate Item Management            |#classPath+"/login?menu=caduplicate" 
+//Transfer To AP (admin)                    |#classPath+"/login?screen=pogrnheaderacadmin" 
+//Supplier Invoice (admin)                 |#classPath+"/login?screen=apinvoiceadmin" 
+//Entry Review                      	|#classPath+"/login?screen=*aspcrystal adminreviewpass(xstart=Issue No,xpassword=Password)"
+//User and Date wise Entry Review     |#classPath+"/login?screen=*aspcrystal admindatewisereview(zemail=User,xdate=Fromdate=#date,xdate=To Date=#date,xpassword=Password)"
+//The Business                     |#classPath+"/login?screen=zbusiness"
+//Modules                          |#classPath+"/login?screen=*modules"
+//Models                           |#classPath+"/login?screen=*models"
+//Lists                            |#classPath+"/login?menu=lists"
+
+//-------------------------------------------------------------------

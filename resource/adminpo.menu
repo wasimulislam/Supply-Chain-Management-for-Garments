@@ -1,0 +1,48 @@
+//adminpo.menu
+//-------------------------------------------------------------------
+option								|action
+//-------------------------------------------------------------------
+//----------------------------------------New Screens Created By Fokhrul --------------------------------------
+PO Update(Admin)            				|#classPath+"/login?screen=poordheaderup" 
+
+
+
+//----------------------------------------OLD Screens Created By Forhad Vai--------------------------------------
+//Purchase Order                    |#classPath+"/login?screen=poordheadercashdir"
+//PO Update            				|#classPath+"/login?screen=poordheaderup" 
+GRN Update(Admin)					|#classPath+"/login?screen=pogrnheaderadmin" 
+GRN Reset(Admin)					|#classPath+"/login?screen=pogrndeleteadmin"
+RM Direct Receive/Reset   		    |#classPath+"/login?screen=imtorheaderrmadmin"        |       |      |120
+Batch Process (Reset)   			|#classPath+"/login?screen=moheaderrawadmin"        |       |      |120
+Loan Entry (Reset)Admin   			|#classPath+"/login?screen=imloanheaderadmin"        |       |      |120
+Store Requisition Rejet(Admin)   	|#classPath+"/login?screen=moreqheaderdphadmin"        |       |      |120
+SPR Rejet(Admin)   					|#classPath+"/login?screen=imsprheaderappadmin"        |       |      |120
+PO  Rejet(Admin)   					|#classPath+"/login?screen=poordheadercpoadmin"        |       |      |120
+PR  Update(Admin)   				|#classPath+"/login?screen=poreqhedadmin"        |       |      |120
+//Voucher Post(Admin)   				|#classPath+"/login?screen=acpostadmin"        |       |      |120
+//CP/ACP Post/Unpost(Admin)   		|#classPath+"/login?screen=acheaderpostCPadmin"        |       |      |120
+//Voucher Post 					    |#classPath+"/login?screen=acheaderpost"
+//Petty Cash Voucher Post 		    |#classPath+"/login?screen=acheaderpostCP"
+Voucher Update(Admin) 				|#classPath+"/login?screen=acheaderpostbank"
+AR/AP Update(Admin) 				|#classPath+"/login?screen=arhedadmin"
+IOU Requisition Entry(Admin)   		|#classPath+"/login?screen=acreqheaderadmin"        |       |      |120
+IOU Payment (Admin)   				|#classPath+"/login?screen=acreqheaderpayadmin"        |       |      |120
+IOU Final Sattlement (Admin)   		|#classPath+"/login?screen=acreqheadersettleadmin"        |       |      |120
+Money Receipt Entry (Admin)  		|#classPath+"/login?screen=arcasadmin"        |       |      |120
+Supplier Payment (Admin)  			|#classPath+"/login?screen=appaymentadmin"        |       |      |120
+PI Entry (Admin)  					|#classPath+"/login?screen=opordlcheaderadmin"        |       |      |120
+SMDO  Rejet(Admin)   				|#classPath+"/login?screen=smopdoheadercsmadmin"        |       |      |120
+
+//Admin -> AP						|#classPath+"/login?menu=apadmin" 
+//Admin -> AR						|#classPath+"/login?menu=aradmin" 
+//Admin -> EH Over Qty				|#classPath+"/login?menu=adminehoverqty" 
+//Transfer To AP (admin)			|#classPath+"/login?screen=pogrnheaderacadmin" 
+//Supplier Invoice (admin)			|#classPath+"/login?screen=apinvoiceadmin" 
+//Entry Review                      |#classPath+"/login?screen=*aspcrystal adminreviewpass(xstart=Issue No,xpassword=Password)"
+//User and Date wise Entry Review   |#classPath+"/login?screen=*aspcrystal admindatewisereview(zemail=User,xdate=Fromdate=#date,xdate=To Date=#date,xpassword=Password)"
+//The Business						|#classPath+"/login?screen=zbusiness"
+//Modules							|#classPath+"/login?screen=*modules"
+//Models							|#classPath+"/login?screen=*models"
+//Lists								|#classPath+"/login?menu=lists"
+
+//-------------------------------------------------------------------

@@ -1,0 +1,17 @@
+//General Ledger Reports.menu
+//-------------------------------------------------------------------
+option                           |action
+//-------------------------------------------------------------------FROM UHL------------------------------------------------------------------------------
+//Date Wise Trial Balance111          |#classPath+"/login?screen=*viewcrystal actbl(7;in,st,st,in,dt,dt,st;zid,user,wh,year,fdate,tdate,reptype;xuserhide=User ID,xproject=Project,xyearcombo=Year=,xdate=From Date=#date,xdate=To Date=#date,xreptbltype=Report Type,xviewtype=Report View;rptproc=zabsp_RPT_actbl)"
+//Trial Balance By Group          |#classPath+"/login?screen=*viewcrystal actblgroup(6;in,st,st,dt,dt,in;zid,wh,reptype,fdate,tdate,year;xproject=Project,xreptype=Report Type,xdate=From Date<span>*</span>=#date,xdate=To Date<span>*</span>=#date,xyearcombo=Year<span>*</span>,xviewtype=Report View)"
+//--------------------old reports--------
+Date Wise Trial Balance          |#classPath+"/login?screen=*viewcrystal actbldate(4;in,dt,dt,in;zid,fdate,tdate,year;xdate=From Date=#date,xdate=To Date=#date,xyearcombo=Year=,xviewtype=Report View)"
+Trial Balance By Month           |#classPath+"/login?screen=*viewcrystal actbl(3;in,in,in;zid,year,period;xyearcombo=Year=,xper=Period=,xviewtype=Report View)"
+Trial Balance By Group           |#classPath+"/login?screen=*viewcrystal actbldategroup(4;in,dt,dt,in;zid,fdate,tdate,year;xdate=From Date=#date,xdate=To Date=#date,xyearcombo=Year=,xviewtype=Report View)"
+Trial Balance By Group (Detail) |#classPath+"/login?screen=*viewcrystal actbldategroupdetail(4;in,dt,dt,in;zid,fdate,tdate,year;xdate=From Date=#date,xdate=To Date=#date,xyearcombo=Year=,xviewtype=Report View)"
+Consolidated Trial Balance       |#classPath+"/login?screen=*viewcrystal actblcons(4;in,dt,dt,in;zid,fdate,tdate,year;xdate=From Date=#date,xdate=To Date=#date,xyearcombo=Year=,xviewtype=Report View)"
+Consolidated Group Trial Balance      |#classPath+"/login?screen=*viewcrystal actbldategroupcons(4;in,dt,dt,in;zid,fdate,tdate,year;xdate=From Date=#date,xdate=To Date=#date,xyearcombo=Year=,xviewtype=Report View)"
+Consolidated Group Trial Balance (Detail)      |#classPath+"/login?screen=*viewcrystal actbldategroupdetailcons(4;in,dt,dt,in;zid,fdate,tdate,year;xdate=From Date=#date,xdate=To Date=#date,xyearcombo=Year=,xviewtype=Report View)"
+Cross Year Sub-code TB(Testing) |#classPath+"/login?screen=*viewcrystal actblsubdateall(4;in,st,dt,dt;zid,wh,fdate,tdate;xwh=Branch,xdate=From Date=#date,xdate=To Date=#date,xviewtype=Report View)"
+
+

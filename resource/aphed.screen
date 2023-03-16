@@ -1,0 +1,135 @@
+screen aphed
+
+     caption "AP Transactions"
+     sections form one, list header, jscript myscript
+
+
+    list header
+        caption "<br><center><b>"Transaction List"</b>"
+        table aphed
+        order xvoucher
+        select "xsign<0"
+        navigators alpha
+        rows 10
+        objects ~
+         xvoucher attrib(link "login?screen=aphed&command=Show&xvoucher=?"), ~
+         xdate,xyear,xper
+     end list
+
+
+     form one
+        caption "AP Header"
+        table aphed
+        order xvoucher
+        select "xsign<0"
+        return "login"
+        pstyle 1
+        layout 2
+        objects Details, Clear,Show,Add, Update, Delete, Top, Previous, Next, Bottom,"<p>" ,~
+                xvoucher display(trn AP Transactions),xdate,xsup,xname,xref,xdateref,xyear,xper,xcur,xexch,~
+                xprime,xbase,xbalprime attrib(readonly),xbalbase attrib(readonly),xtypeobj,xdatedue,xstatusjv,xlong,xsign display(hidden)
+
+        field xname
+          attrib local
+          display constant
+          event after
+            set xname = casup.xorg("xsup= '"+xsup+"'")
+          end event
+        end field
+
+        field xtypeobj
+          caption Type
+          pick "1-Trade,2-Non Trade,3-Credit,4-Open Item"
+        end field
+
+        field xcur
+          dispaly combo
+          width 3
+        end field
+
+        field xlong
+          caption Header Description
+          width 50
+        end field
+
+        field xstatusjv
+           display constant
+        end field
+
+
+        field xvoucher
+         event after
+          set globals(xvoucher)=xvoucher
+          set globals(xstate)=xvoucher_ONE
+         end event
+        end field
+
+
+        field Add
+          event before
+            set xexch = #exch(xdate,xcur)
+            set xyear = #year(xdate,acdef)
+            set xper = #per(xdate,acdef)
+            class gltrn(apValidateBeforeHead{xvoucher})
+          end event
+          event after
+            class gltrn(apValidateAfterHead{xvoucher})
+          end event
+        end field
+
+        field Update
+          event before
+            set xexch = #exch(xdate,xcur)
+            set xyear = #year(xdate,acdef)
+            set xper = #per(xdate,acdef)
+            class gltrn(apValidateBeforeHead{xvoucher})
+            set temp = #sql("select xinvnum from apalc where xinvnum = '"+xvoucher+"'")
+            if #result .eq. "true"
+              error "Cannot Proceed Already Allocated"
+            end if
+          end event
+          event after
+            class gltrn(apValidateAfterHead{xvoucher})
+          end event
+        end field
+
+        embed onsubmit="submitit(this)"
+
+        field Details
+          embed onclick="clicked(this)"
+        end field
+
+     end form
+
+     jscript myscript
+
+        <script language="javascript" type="text/javascript">
+        var detail
+
+        function clicked(b){
+          detail="clicked"
+        }
+        function submitit(form){
+          if (detail=="clicked"){
+            form.screen.value = "aptrn"
+            form.searchbutton.value = "Find xvoucher=?"
+            //return false
+          }
+        }
+
+        function pickCur(link, exch){
+          if (navigator.appName.indexOf("Netscape") >= 0){
+            document.one.xcur.value=link.text
+            document.one.xexch.value=exch.text
+          }else{
+            document.one.xcur.value=link.innerText
+            document.one.xexch.value=exch.innerText
+          }
+          return false
+        }
+        </script>
+     end jscript
+
+
+
+end screen
